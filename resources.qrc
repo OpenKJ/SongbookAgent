@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/AppIcon.png</file>
+        <file>resources/view-refresh.png</file>
+        <file>resources/edit-delete.png</file>
+        <file>resources/AppIcon-blink.png</file>
+    </qresource>
+</RCC>
