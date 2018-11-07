@@ -52,6 +52,8 @@ private slots:
     void on_cbxVenue_currentIndexChanged(int index);
     void on_checkBoxAccepting_clicked(bool checked);
     void blinkTimerTimeout();
+    void showAlert(QString title, QString message);
+
 
 protected:
     void closeEvent(QCloseEvent *event);

@@ -1,6 +1,7 @@
 #include "songbookclient.h"
 #include "ui_songbookclient.h"
 
+#include <QMessageBox>
 #include <qevent.h>
 
 SongbookClient::SongbookClient(QWidget *parent) :
@@ -38,7 +39,7 @@ SongbookClient::SongbookClient(QWidget *parent) :
     connect(sbApi, SIGNAL(requestsChanged(OkjsRequests)), this, SLOT(requestsChanged(OkjsRequests)));
     connect(sbApi, SIGNAL(synchronized(QTime)), this, SLOT(synchronized(QTime)));
     connect(blinkTimer, SIGNAL(timeout()), this, SLOT(blinkTimerTimeout()));
-
+    connect(sbApi, SIGNAL(alertReceived(QString, QString)), this, SLOT(showAlert(QString, QString)));
     oneShot = new QTimer(this);
     oneShot->setSingleShot(true);
     connect(oneShot, SIGNAL(timeout()), this, SLOT(autoSizeCols()));
@@ -110,8 +111,9 @@ void SongbookClient::autoSizeCols()
 {
     int fH = QFontMetrics(settings.font()).height();
     int tsColSize = QFontMetrics(settings.font()).width(" 00/00/00 00:00 pm ");
+    int keySize = QFontMetrics(settings.font()).width("_Key_");
     int iconWidth = fH + fH;
-    int remainingSpace = ui->tableView->width() - tsColSize - iconWidth;
+    int remainingSpace = ui->tableView->width() - tsColSize - keySize - iconWidth;
     int singerColSize = (remainingSpace / 3) - 120;
     int artistColSize = (remainingSpace / 3);
     int titleColSize = (remainingSpace / 3) + 115;
@@ -120,8 +122,10 @@ void SongbookClient::autoSizeCols()
     ui->tableView->horizontalHeader()->resizeSection(2, titleColSize);
     ui->tableView->horizontalHeader()->resizeSection(3, tsColSize);
     ui->tableView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
-    ui->tableView->horizontalHeader()->resizeSection(4, iconWidth);
+    ui->tableView->horizontalHeader()->resizeSection(4, keySize);
     ui->tableView->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Fixed);
+    ui->tableView->horizontalHeader()->resizeSection(5, iconWidth);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Fixed);
 }
 
 void SongbookClient::synchronized(QTime updateTime)
@@ -152,7 +156,7 @@ void SongbookClient::resizeEvent(QResizeEvent *event)
 
 void SongbookClient::on_tableView_clicked(const QModelIndex &index)
 {
-    if (index.column() == 4)
+    if (index.column() == 5)
     {
         sbApi->removeRequest(index.data(Qt::UserRole).toInt());
     }
@@ -196,4 +200,13 @@ void SongbookClient::blinkTimerTimeout()
         icon->setIcon(QIcon(QPixmap(":/resources/AppIcon.png")));
         blinked = false;
     }
+}
+
+void SongbookClient::showAlert(QString title, QString message)
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(title);
+    msgBox.setText(message);
+   // msgBox.setInformativeText(file);
+    msgBox.exec();
 }

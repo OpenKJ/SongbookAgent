@@ -13,14 +13,15 @@ class OkjsSong
 {
 public:
     OkjsSong() {}
-    OkjsSong(QString Artist, QString Title) { artist = Artist; title = Title; }
+    OkjsSong(QString Artist, QString Title, int Key = 0) { artist = Artist; title = Title; key=Key; }
     QString artist;
     QString title;
+    int key;
 };
 
 inline bool operator==(const OkjsSong &s1, const OkjsSong &s2)
 {
-    return s1.artist.toLower() == s2.artist.toLower() && s1.title.toLower() == s2.title.toLower();
+    return s1.artist.toLower() == s2.artist.toLower() && s1.title.toLower() == s2.title.toLower() && s1.key == s2.key;
 }
 
 inline uint qHash(const OkjsSong &obj, uint seed) {
@@ -36,6 +37,7 @@ public:
     QString singer;
     QString artist;
     QString title;
+    int key;
     int time;
     bool operator == (const OkjsRequest r) const;
 };
@@ -83,6 +85,8 @@ public:
     void clearRequests();
     void updateSongDb(OkjsSongs songs);
     int numRequests();
+    void alertCheck();
+
 
 signals:
     void venuesChanged(OkjsVenues);
@@ -94,6 +98,8 @@ signals:
     void requestsChanged(OkjsRequests);
     void synchronized(QTime);
     void delayError(int);
+    void alertReceived(QString title, QString message);
+
 
 public slots:
     bool testApiKey(QString key);

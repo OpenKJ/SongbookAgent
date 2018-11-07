@@ -35,9 +35,10 @@ private:
     QString m_artist;
     QString m_title;
     QString m_singer;
+    int m_key;
 
 public:
-    Request(int RequestId, QString Singer, QString Artist, QString Title, int ts);
+    Request(int RequestId, QString Singer, QString Artist, QString Title, int ts, int key);
     int requestId() const;
     void setRequestId(int requestId);
     int timeStamp() const;
@@ -49,6 +50,8 @@ public:
     QString singer() const;
     void setSinger(const QString &singer);
 
+    int key() const;
+    void setKey(int key);
 };
 
 class RequestsTableModel : public QAbstractTableModel
@@ -63,7 +66,7 @@ private:
 
 public:
     explicit RequestsTableModel(OKJSongbookAPI *sbApi, QObject *parent = 0);
-    enum {SINGER=0,ARTIST,TITLE,TIMESTAMP};
+    enum {SINGER=0,ARTIST,TITLE,TIMESTAMP,KEY};
     int count();
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
@@ -73,6 +76,9 @@ public:
 
 private slots:
     void requestsChanged(OkjsRequests requests);
+
+signals:
+    void alertReceived(QString title, QString message);
 };
 
 #endif // REQUESTSTABLEMODEL_H

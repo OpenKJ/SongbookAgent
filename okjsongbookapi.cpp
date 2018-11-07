@@ -18,7 +18,7 @@ QDebug operator<<(QDebug dbg, const OkjsVenue &okjsvenue)
 
 OKJSongbookAPI::OKJSongbookAPI(QObject *parent) : QObject(parent)
 {
-    serverUrl = QUrl("https://songbook.openkj.org/api");
+    serverUrl = QUrl("https://api.okjsongbook.com");
     delayErrorEmitted = false;
     connectionReset = false;
     serial = 0;
@@ -30,6 +30,7 @@ OKJSongbookAPI::OKJSongbookAPI(QObject *parent) : QObject(parent)
     connect(timer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
     refreshVenues();
     timer->start();
+    alertCheck();
 }
 
 void OKJSongbookAPI::getSerial()
@@ -83,6 +84,7 @@ bool OKJSongbookAPI::getAccepting()
 
 void OKJSongbookAPI::setAccepting(bool enabled)
 {
+    alertCheck();
     QJsonObject mainObject;
     mainObject.insert("api_key", settings.apiKey());
     mainObject.insert("command","setAccepting");
@@ -242,6 +244,7 @@ bool OKJSongbookAPI::testApiKey(QString key)
             return true;
         }
     }
+    return false;
 }
 
 void OKJSongbookAPI::onSslErrors(QNetworkReply *reply, QList<QSslError> errors)
@@ -258,6 +261,18 @@ void OKJSongbookAPI::onSslErrors(QNetworkReply *reply, QList<QSslError> errors)
 
     }
     lastUrl = serverUrl;
+}
+
+void OKJSongbookAPI::alertCheck()
+{
+    QJsonObject mainObject;
+    mainObject.insert("api_key", settings.apiKey());
+    mainObject.insert("command","getAlert");
+    QJsonDocument jsonDocument;
+    jsonDocument.setObject(mainObject);
+    QNetworkRequest request(serverUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    manager->post(request, jsonDocument.toJson());
 }
 
 void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
@@ -277,6 +292,15 @@ void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
         qWarning() << "Got error json reply";
         qWarning() << "Error string: " << json.object().value("errorString");
         return;
+    }
+    if (command == "getAlert")
+    {
+        if(json.object().value("alert").toBool())
+        {
+            emit alertReceived(json.object().value("title").toString(), json.object().value("message").toString());
+            venues.clear();
+            refreshVenues();
+        }
     }
     if (command == "getSerial")
     {
@@ -341,6 +365,7 @@ void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
             request.title = jsonObject.value("title").toString();
             request.singer = jsonObject.value("singer").toString();
             request.time = jsonObject.value("request_time").toInt();
+            request.key = jsonObject.value("key_change").toInt();
             l_requests.append(request);
         }
         if (requests != l_requests)
