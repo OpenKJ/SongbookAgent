@@ -1,7 +1,6 @@
 {
   "title": "OpenKJ Songbook Agent",
   "icon": "/Users/travis/build/OpenKJ/KaraokeBookAgent/Resources/AppIcon.png",
-  "background": "/Users/lightburnisaac/dmgbkg.png",
   "contents": [
     { "x": 378, "y": 225, "type": "link", "path": "/Applications" },
     { "x": 138, "y": 225, "type": "file", "path": "/Users/travis/build/OpenKJ/SongbookAgent/SongbookAgent.app" }
