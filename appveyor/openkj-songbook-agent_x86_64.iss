@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "OpenKJ Songbook Agent"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "OpenKJ Project"
 #define MyAppURL "https://okjsongbook.com/"
 #define MyAppExeName "SongbookClient.exe"
