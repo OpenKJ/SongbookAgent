@@ -13,3 +13,5 @@ export INSTALLERFN="OpenKJ-SongShop-${SSVER}-${BRANCH}-osx-installer.dmg"
 
 chmod 755 ./travis/install.sh
 chmod 755 ./travis/build.sh
+
+openssl aes-256-cbc -K $encrypted_87fb155abb03_key -iv $encrypted_87fb155abb03_iv -in travis/MacSigningCert.p12.enc -out applekey.p12 -d

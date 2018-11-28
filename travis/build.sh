@@ -27,5 +27,5 @@ appdmg travis/openkj-songbook-agent-dmg.json ${INSTALLERFN}
 echo "Signing installer"
 codesign -s "Application: Isaac Lightburn (47W8CPBS5A)" -vvvv --timestamp=none ${INSTALLERFN}
 
-mkdir deploy
-mv ${INSTALLERFN} deploy/
+mkdir -p deploy/macos/${BRANCH}
+mv ${INSTALLERFN} deploy/macos/${BRANCH}/

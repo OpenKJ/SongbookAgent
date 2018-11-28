@@ -14,18 +14,11 @@ security default-keychain -s build.keychain
 security unlock-keychain -p $keychainPass build.keychain
 security set-keychain-settings -t 3600 -u build.keychain
 
-
-wget -c --no-check-certificate -nv -Ocscrt.zip https://cloud.hm.hozed.net/index.php/s/6RbXk0TDIABnksR/download
-
-curl -k -u appveyor:${deployPass} -T cscrt.zip sftp://openkj.org:/opt/bitnami/apache2/htdocs/downloads/test/MacOS/test.zip
-
-unzip -P$cscrtPass cscrt.zip
-
 security import applekey.p12 -k build.keychain -P $p12Pass -A 
 security set-key-partition-list -S apple-tool:,apple: -s -k $keychainPass build.keychain
 
-echo "Installing osxrelocator"
-pip2 install osxrelocator
+#echo "Installing osxrelocator"
+#pip2 install osxrelocator
 
 echo "Installing appdmg"
 npm install -g appdmg

@@ -57,4 +57,4 @@ deploy_script:
 # Upload all zip files from artifacts. 
 # You upload by simple using local paths, but it is better to do this with $artifacts as you are in 100% sync with artifacts
 # Or is simple do `- gsutil\gsutil cp <local_file_path> gs://my-test-bucket (thus avoiding NativeCommandError in build log)
-  - ps: $artifacts.values | ForEach-Object {.\gsutil\gsutil cp $_.path gs://openkj-songbook-agent/$($env:APPVEYOR_REPO_BRANCH)}
+  - ps: $artifacts.values | ForEach-Object {.\gsutil\gsutil cp $_.path gs://openkj-songbook-agent/windows/$($env:APPVEYOR_REPO_BRANCH)}
