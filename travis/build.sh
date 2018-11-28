@@ -13,14 +13,16 @@ $HOME/Qt/5.10.0/clang_64/bin/qmake
 
 make -j3
 
-$HOME/Qt/5.10.0/clang_64/bin/macdeployqt ${BundlePath}
+mv SongbookAgent.app "Songbook Agent.app"
+
+$HOME/Qt/5.10.0/clang_64/bin/macdeployqt "Songbook Agent.app"
 echo "Removing unneeded and non-appstore compliant plugins"
-rm -f ${BundlePath}/Contents/PlugIns/sqldrivers/libqsqlmysql.dylib
-rm -f ${BundlePath}/Contents/PlugIns/sqldrivers/libqsqlodbc.dylib
-rm -f ${BundlePath}/Contents/PlugIns/sqldrivers/libqsqlpsql.dylib
+rm -f "Songbook Agent.app/Contents/PlugIns/sqldrivers/libqsqlmysql.dylib"
+rm -f "Songbook Agent.app/Contents/PlugIns/sqldrivers/libqsqlodbc.dylib"
+rm -f "Songbook Agent.app/Contents/PlugIns/sqldrivers/libqsqlpsql.dylib"
 
 echo "Signing code"
-codesign -s "Application: Isaac Lightburn (47W8CPBS5A)" -vvvv --deep --timestamp=none ${BundlePath}
+codesign -s "Application: Isaac Lightburn (47W8CPBS5A)" -vvvv --deep --timestamp=none "Songbook Agent.app"
 echo "Creating installer"
 cp travis/dmgbkg.png ~/
 appdmg travis/openkj-songbook-agent-dmg.json ${INSTALLERFN} 

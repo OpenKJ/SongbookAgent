@@ -3,6 +3,6 @@
   "icon": "/Users/travis/build/OpenKJ/SongbookAgent/Resources/AppIcon.png",
   "contents": [
     { "x": 378, "y": 225, "type": "link", "path": "/Applications" },
-    { "x": 138, "y": 225, "type": "file", "path": "/Users/travis/build/OpenKJ/SongbookAgent/SongbookAgent.app" }
+    { "x": 138, "y": 225, "type": "file", "path": "/Users/travis/build/OpenKJ/SongbookAgent/Songbook Agent.app" }
   ]
 }
