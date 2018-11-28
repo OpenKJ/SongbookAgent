@@ -41,6 +41,6 @@ cd %project_dir%\installer\windows\%LONGARCH%\
 dir
 rem binarycreator.exe --offline-only -c config\config.xml -p packages OpenKJ-Tools-%SBAVERSION%-windows-%LONGARCH%-installer.exe
 "C:\Program Files (x86)\Inno Setup 5\iscc.exe" "%project_dir%\appveyor\openkj-songbook-agent_%LONGARCH%.iss" /O"%project_dir%/"
-move "%project_dir%\SongbookClient.exe" "%project_dir%\openkj-songbook-agent-%SBAVERSION%-%BITS%-setup.exe"
+move "%project_dir%\openkj-songbook-agent.exe" "%project_dir%\openkj-songbook-agent-%SBAVERSION%-%BITS%-setup.exe"
 echo Signing installer...
 signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f "%project_dir%\cscrt\cscrt.pfx" /p "%pfx_pass%" "%project_dir%\openkj-songbook-agent-%SBAVERSION%-%BITS%-setup.exe
