@@ -204,6 +204,7 @@ void SongbookClient::blinkTimerTimeout()
 
 void SongbookClient::showAlert(QString title, QString message)
 {
+    show();
     QMessageBox msgBox;
     msgBox.setWindowTitle(title);
     msgBox.setText(message);

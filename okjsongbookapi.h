@@ -68,6 +68,7 @@ private:
     OkjsRequests requests;
     QNetworkAccessManager *manager;
     QTimer *timer;
+    QTimer *alertTimer;
     QTime lastSync;
     bool delayErrorEmitted;
     bool connectionReset;
@@ -108,6 +109,7 @@ private slots:
         void onSslErrors(QNetworkReply * reply, QList<QSslError> errors);
         void onNetworkReply(QNetworkReply* reply);
         void timerTimeout();
+        void alertTimerTimeout();
         void setInterval(int interval);
 };
 

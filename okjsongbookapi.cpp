@@ -24,10 +24,13 @@ OKJSongbookAPI::OKJSongbookAPI(QObject *parent) : QObject(parent)
     serial = 0;
     timer = new QTimer(this);
     timer->setInterval(10000);
+    alertTimer = new QTimer(this);
+    alertTimer->start(300000);
     manager = new QNetworkAccessManager(this);
     connect(manager, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SLOT(onSslErrors(QNetworkReply*,QList<QSslError>)));
     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onNetworkReply(QNetworkReply*)));
     connect(timer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
+    connect(alertTimer, SIGNAL(timeout()), this, SLOT(alertTimerTimeout()));
     refreshVenues();
     timer->start();
     alertCheck();
@@ -268,6 +271,7 @@ void OKJSongbookAPI::alertCheck()
     QJsonObject mainObject;
     mainObject.insert("api_key", settings.apiKey());
     mainObject.insert("command","getAlert");
+    mainObject.insert("app", "standalone");
     QJsonDocument jsonDocument;
     jsonDocument.setObject(mainObject);
     QNetworkRequest request(serverUrl);
@@ -386,6 +390,11 @@ void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
         refreshRequests();
         refreshVenues();
     }
+}
+
+void OKJSongbookAPI::alertTimerTimeout()
+{
+    alertCheck();
 }
 
 void OKJSongbookAPI::timerTimeout()
