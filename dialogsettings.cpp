@@ -11,6 +11,11 @@ DialogSettings::DialogSettings(OKJSongbookAPI *sbapi, QWidget *parent) :
     ui->setupUi(this);
     loadFromSettings();
     connect(ui->btnTest, SIGNAL(clicked(bool)), this, SLOT(testApiKey()));
+
+#ifdef Q_OS_MACX
+    // Disable/hide this setting since it doesn't work on Mac anyway
+    ui->checkBoxPopup->hide();
+#endif
 }
 
 DialogSettings::~DialogSettings()
