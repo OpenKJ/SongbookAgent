@@ -7,8 +7,8 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     a.setOrganizationName("OpenKJ Project");
-    a.setApplicationName("KaraokeBookAgent");
-    a.setApplicationDisplayName("KaraokeBook Agent");
+    a.setApplicationName("SongbookAgent");
+    a.setApplicationDisplayName("OpenKJ Songbook Agent");
     Settings settings;
     QPalette palette;
     a.setStyle(QStyleFactory::create("Fusion"));

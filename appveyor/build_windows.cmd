@@ -20,9 +20,9 @@ nmake
 echo Packaging...
 cd %project_dir%\build\windows\msvc\%LONGARCH%\release\
 dir
-windeployqt release\SongbookClient.exe
-echo Signing OpenKJ-Songbook-Client binary
-signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f "%project_dir%\cscrt\cscrt.pfx" /p "%pfx_pass%" release\SongbookClient.exe
+windeployqt release\SongbookAgent.exe
+echo Signing OpenKJ SongbookAgent binary
+signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f "%project_dir%\cscrt\cscrt.pfx" /p "%pfx_pass%" release\SongbookAgent.exe
 
 echo Copying project files for archival...
 copy "%project_dir%\README.md" "release\README.md"

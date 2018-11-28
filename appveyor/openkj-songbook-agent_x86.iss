@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "OpenKJ Songbook Agent"
-#define MyAppVersion "1.0.6"
+#define MyAppVersion "1.0.8"
 #define MyAppPublisher "OpenKJ Project"
 #define MyAppURL "https://okjsongbook.com/"
-#define MyAppExeName "SongbookClient.exe"
+#define MyAppExeName "SongbookAgent.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -36,7 +36,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "C:\projects\openkj\output\SongbookClient.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\projects\openkj\output\SongbookAgent.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\projects\openkj\output\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

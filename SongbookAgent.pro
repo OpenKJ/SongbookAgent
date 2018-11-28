@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets network
 
 win32: RC_ICONS = resources/AppIcon.ico
 
-TARGET = SongbookClient
+TARGET = SongbookAgent
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
