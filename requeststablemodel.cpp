@@ -83,9 +83,9 @@ QVariant RequestsTableModel::data(const QModelIndex &index, int role) const
         switch(index.column())
         {
         case KEY:
-            return Qt::AlignHCenter;
+            return QVariant(Qt::AlignHCenter | Qt::AlignVCenter);
         default:
-            return Qt::AlignLeft;
+            return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
         }
     if(role == Qt::DisplayRole)
     {
