@@ -83,7 +83,7 @@ QVariant RequestsTableModel::data(const QModelIndex &index, int role) const
         switch(index.column())
         {
         case KEY:
-            return Qt::AlignCenter;
+            return Qt::AlignHCenter;
         default:
             return Qt::AlignLeft;
         }
