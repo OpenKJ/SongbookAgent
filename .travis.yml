@@ -22,5 +22,3 @@ deploy:
   bucket: openkj-songbook-agent
   skip-cleanup: true
   local-dir: deploy
-  on:
-    repo: OpenKJ/SongbookAgent
