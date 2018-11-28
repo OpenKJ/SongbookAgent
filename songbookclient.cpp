@@ -26,8 +26,9 @@ SongbookClient::SongbookClient(QWidget *parent) :
     iconMenu->addAction(showAction);
     iconMenu->addAction(hideAction);
     iconMenu->addAction(exitAction);
+#ifndef Q_OS_MACX
     icon->setContextMenu(iconMenu);
-
+#endif
     connect(showAction, SIGNAL(triggered(bool)), this, SLOT(show()));
     connect(hideAction, SIGNAL(triggered(bool)), this, SLOT(hide()));
     connect(exitAction, SIGNAL(triggered(bool)), this, SLOT(closeProgram()));
@@ -54,11 +55,12 @@ SongbookClient::~SongbookClient()
 
 void SongbookClient::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
+#ifndef Q_OS_MACX
     qWarning() << "iconActivated fired";
     if (reason != QSystemTrayIcon::Context)
         this->setVisible(!this->isVisible());
   //  if (reason == QSystemTrayIcon::Context)
-
+#endif
 }
 
 void SongbookClient::on_btnHide_clicked()
@@ -136,15 +138,15 @@ void SongbookClient::synchronized(QTime updateTime)
 
 void SongbookClient::closeEvent(QCloseEvent *event)
 {
-#ifdef Q_OS_OSX
-    if (!event->spontaneous() || !isVisible()) {
-        return;
-    }
-#endif
+#ifndef Q_OS_MACX
     if (icon->isVisible()) {
         hide();
         event->ignore();
     }
+#else
+    closeProgram();
+#endif
+
 }
 
 
