@@ -7,7 +7,7 @@ if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
   exit 0
 fi
 
-BundlePath=$PWD/SongbookClient.app
+BundlePath=$PWD/SongbookAgent.app
 
 $HOME/Qt/5.10.0/clang_64/bin/qmake
 
