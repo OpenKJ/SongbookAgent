@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
+#include <QMessageBox>
 
 
 QDebug operator<<(QDebug dbg, const OkjsVenue &okjsvenue)
@@ -222,7 +223,14 @@ bool OKJSongbookAPI::testApiKey(QString key)
     QObject::connect(reply, SIGNAL(finished()),&loop, SLOT(quit()));
     loop.exec();
     if (reply->error() != QNetworkReply::NoError)
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Network Error");
+        msgBox.setText(reply->errorString());
+        msgBox.exec();
+        qWarning() << "Got network error: " << reply->errorString();
         return false;
+    }
     QByteArray data = reply->readAll();
     delete reply;
     QJsonDocument json = QJsonDocument::fromJson(data);
