@@ -9,6 +9,7 @@
 #include "okjsongbookapi.h"
 #include "settings.h"
 #include "dialogupdate.h"
+#include "dialogabout.h"
 
 namespace Ui {
 class SongbookClient;
@@ -27,6 +28,7 @@ private:
     QSystemTrayIcon *icon;
     DialogSettings *dlgSettings;
     DialogUpdate *dlgUpdate;
+    DialogAbout *dlgAbout;
     RequestsTableModel *reqModel;
     OKJSongbookAPI *sbApi;
     Settings settings;
@@ -53,6 +55,7 @@ private slots:
     void on_checkBoxAccepting_clicked(bool checked);
     void blinkTimerTimeout();
     void showAlert(QString title, QString message);
+    void launchDocs();
 
 
 protected:
