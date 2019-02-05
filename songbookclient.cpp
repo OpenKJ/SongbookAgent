@@ -6,6 +6,7 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <qevent.h>
+#include "dialogupdater.h"
 
 SongbookClient::SongbookClient(QWidget *parent) :
     QMainWindow(parent),
@@ -13,6 +14,7 @@ SongbookClient::SongbookClient(QWidget *parent) :
 {
     ui->setupUi(this);
     sbApi = new OKJSongbookAPI(this);
+    sbApi->versionCheck();
     icon = new QSystemTrayIcon(this);
     icon->setIcon(QIcon(QPixmap(":/resources/AppIcon.png")));
     icon->show();
@@ -47,6 +49,7 @@ SongbookClient::SongbookClient(QWidget *parent) :
     connect(sbApi, SIGNAL(synchronized(QTime)), this, SLOT(synchronized(QTime)));
     connect(blinkTimer, SIGNAL(timeout()), this, SLOT(blinkTimerTimeout()));
     connect(sbApi, SIGNAL(alertReceived(QString, QString)), this, SLOT(showAlert(QString, QString)));
+    connect(sbApi, SIGNAL(newVersionAvailable(QString, QString, QString, QString, QString)), this, SLOT(newVersionAvailable(QString, QString, QString, QString, QString)));
     oneShot = new QTimer(this);
     oneShot->setSingleShot(true);
     connect(oneShot, SIGNAL(timeout()), this, SLOT(autoSizeCols()));
@@ -237,4 +240,11 @@ void SongbookClient::showAlert(QString title, QString message)
 void SongbookClient::launchDocs()
 {
     QDesktopServices::openUrl(QUrl("https://docs.okjsongbook.com"));
+}
+
+void SongbookClient::newVersionAvailable(QString curVersion, QString availVersion, QString branch, QString os, QString url)
+{
+    DialogUpdater dlgUpdater(curVersion,availVersion,branch,os,url,this);
+    dlgUpdater.exec();
+
 }

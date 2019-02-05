@@ -38,7 +38,8 @@ SOURCES += \
     okjsongbookapi.cpp \
     requeststablemodel.cpp \
     dialogupdate.cpp \
-    dialogabout.cpp
+    dialogabout.cpp \
+    dialogupdater.cpp
 
 HEADERS += \
         songbookclient.h \
@@ -47,13 +48,15 @@ HEADERS += \
     okjsongbookapi.h \
     requeststablemodel.h \
     dialogupdate.h \
-    dialogabout.h
+    dialogabout.h \
+    dialogupdater.h
 
 FORMS += \
         songbookclient.ui \
     dialogsettings.ui \
     dialogupdate.ui \
-    dialogabout.ui
+    dialogabout.ui \
+    dialogupdater.ui
 
 RESOURCES += \
     resources.qrc

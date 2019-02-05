@@ -56,6 +56,7 @@ private slots:
     void blinkTimerTimeout();
     void showAlert(QString title, QString message);
     void launchDocs();
+    void newVersionAvailable(QString curVersion, QString availVersion, QString branch, QString os, QString url);
 
 
 protected:
