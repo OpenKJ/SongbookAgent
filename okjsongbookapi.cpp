@@ -324,10 +324,10 @@ void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
         QString os = "unk";
 #ifdef Q_OS_LINUX
         os = "lin";
-#elif defined(Q_OS_WIN32)
-        os = "win32";
 #elif defined(Q_OS_WIN64)
         os = "win64";
+#elif defined(Q_OS_WIN32)
+        os = "win32";
 #elif defined(Q_OS_MAC)
         os = "mac";
 #endif
