@@ -66,11 +66,13 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
     mBox.exec();
     if (os == "win32" || os == "win64")
     {
-        QStringList args;
-        args << destPath;
-        qWarning() << "Launching: " << QDir::toNativeSeparators(destPath);
-        QProcess::startDetached("cmd", args);
-        QApplication::quit();
+        QProcess process;
+        process.setProgram(destPath);
+//        process.setStandardOutputFile(QProcess::nullDevice());
+//        process.setStandardErrorFile(QProcess::nullDevice());
+        qint64 pid;
+        process.startDetached(&pid);
+//        QApplication::quit();
     }
     else if (os == "mac")
     {
