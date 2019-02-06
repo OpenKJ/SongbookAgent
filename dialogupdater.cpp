@@ -59,6 +59,7 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
     file.open(QIODevice::WriteOnly);
     file.write(reply->readAll());
     delete reply;
+    file.close();
     dlgProgress->hide();
     QMessageBox mBox(this);
     mBox.setWindowTitle("Updating");
@@ -66,20 +67,20 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
     mBox.exec();
     if (os == "win32" || os == "win64")
     {
-        QProcess process;
         QString setupFile = "\"" + destPath + "\"";
         qWarning() << "Running setup file: " << setupFile;
-        process.setProgram(setupFile);
-        process.setWorkingDirectory(destDir);
+        QProcess::startDetached(setupFile);
+//        process.setProgram(setupFile);
+//        process.setWorkingDirectory(destDir);
 //        process.setStandardOutputFile(QProcess::nullDevice());
 //        process.setStandardErrorFile(QProcess::nullDevice());
-        qint64 pid;
-        process.start();
-        process.waitForFinished();
-        qWarning() << process.error() << " - " << process.errorString();
-        qWarning() << process.readAllStandardOutput();
-        qWarning() << process.readAllStandardError();
-//        QApplication::quit();
+//        qint64 pid;
+//        process.start();
+//        process.waitForFinished();
+//        qWarning() << process.error() << " - " << process.errorString();
+//        qWarning() << process.readAllStandardOutput();
+//        qWarning() << process.readAllStandardError();
+        QApplication::quit();
     }
     else if (os == "mac")
     {
