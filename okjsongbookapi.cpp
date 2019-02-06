@@ -8,6 +8,7 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QMessageBox>
+#include "version.h"
 
 
 QDebug operator<<(QDebug dbg, const OkjsVenue &okjsvenue)
@@ -223,7 +224,14 @@ bool OKJSongbookAPI::testApiKey(QString key)
     QObject::connect(reply, SIGNAL(finished()),&loop, SLOT(quit()));
     loop.exec();
     if (reply->error() != QNetworkReply::NoError)
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Network Error");
+        msgBox.setText(reply->errorString());
+        msgBox.exec();
+        qWarning() << "Got network error: " << reply->errorString();
         return false;
+    }
     QByteArray data = reply->readAll();
     delete reply;
     QJsonDocument json = QJsonDocument::fromJson(data);
@@ -231,11 +239,8 @@ bool OKJSongbookAPI::testApiKey(QString key)
     bool error = json.object().value("error").toBool();
     if (error)
     {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Network Error");
-        msgBox.setText(reply->errorString());
-        msgBox.exec();
-        qWarning() << "Got network error: " << reply->errorString();
+        qWarning() << "Got error json reply";
+        qWarning() << "Error string: " << json.object().value("errorString");
         return false;
     }
     if (command == "getSerial")
@@ -283,6 +288,18 @@ void OKJSongbookAPI::alertCheck()
     manager->post(request, jsonDocument.toJson());
 }
 
+void OKJSongbookAPI::versionCheck()
+{
+    QJsonObject mainObject;
+    mainObject.insert("api_key", settings.apiKey());
+    mainObject.insert("command","sacCurVersion");
+    QJsonDocument jsonDocument;
+    jsonDocument.setObject(mainObject);
+    QNetworkRequest request(serverUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    manager->post(request, jsonDocument.toJson());
+}
+
 void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
 {
     if (reply->error() != QNetworkReply::NoError)
@@ -300,6 +317,45 @@ void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
         qWarning() << "Got error json reply";
         qWarning() << "Error string: " << json.object().value("errorString");
         return;
+    }
+    if (command == "sacCurVersion")
+    {
+        qWarning() << json;
+        QString os = "unk";
+#ifdef Q_OS_LINUX
+        os = "lin";
+#elif defined(Q_OS_WIN64)
+        os = "win64";
+#elif defined(Q_OS_WIN32)
+        os = "win32";
+#elif defined(Q_OS_MAC)
+        os = "mac";
+#endif
+        if (os == "unk")
+        {
+            qWarning() << "Unable to determine OS platform";
+            return;
+        }
+        QString curVersion = QString(VERSION_STRING);
+        QString branch(VERSION_BRANCH);
+        QString versionKey = branch + "_" + os;
+        QString urlKey = branch + "_url_" + os;
+        qWarning() << "version key: " << versionKey << " url key:" << urlKey;
+        QString latestVersion = json.object().value(versionKey).toString();
+        int latestMajor = json.object().value(versionKey + "_major").toInt();
+        int latestMinor = json.object().value(versionKey + "_minor").toInt();
+        int latestBuild = json.object().value(versionKey + "_build").toInt();
+        QString latestVersionUrl = json.object().value(urlKey).toString();
+        qWarning() << "Current Version: " << curVersion;
+        qWarning() << "Latest Version: " << latestVersion;
+        qWarning() << "Latest version maj: " << latestMajor << " min: " << latestMinor << " bld: " << latestBuild;
+        qWarning() << "Latest Version DL URL: " << latestVersionUrl;
+        if (latestMajor > VERSION_MAJOR || (latestMajor == VERSION_MAJOR && latestMinor > VERSION_MINOR) || (latestMajor == VERSION_MAJOR && latestMinor == VERSION_MINOR && latestBuild > VERSION_BUILD))
+        {
+            qWarning() << "Newer version available, emitting signal";
+            emit newVersionAvailable(curVersion, latestVersion, branch, os, latestVersionUrl);
+        }
+
     }
     if (command == "getAlert")
     {

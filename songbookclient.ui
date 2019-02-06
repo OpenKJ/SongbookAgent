@@ -194,8 +194,16 @@
     <addaction name="actionSettings"/>
     <addaction name="actionUpdate_Songbook"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionDocumentation"/>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
   </widget>
   <action name="actionE_xit">
    <property name="text">
@@ -210,6 +218,16 @@
   <action name="actionUpdate_Songbook">
    <property name="text">
     <string>Update Songbook</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionDocumentation">
+   <property name="text">
+    <string>Documentation</string>
    </property>
   </action>
  </widget>

@@ -87,6 +87,7 @@ public:
     void updateSongDb(OkjsSongs songs);
     int numRequests();
     void alertCheck();
+    void versionCheck();
 
 
 signals:
@@ -100,6 +101,7 @@ signals:
     void synchronized(QTime);
     void delayError(int);
     void alertReceived(QString title, QString message);
+    void newVersionAvailable(QString curVersion, QString availVersion, QString branch, QString os, QString url);
 
 
 public slots:

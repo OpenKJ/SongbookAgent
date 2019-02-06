@@ -66,13 +66,14 @@ private:
 
 public:
     explicit RequestsTableModel(OKJSongbookAPI *sbApi, QObject *parent = 0);
-    enum {SINGER=0,ARTIST,TITLE,TIMESTAMP,KEY};
+    enum {SINGER=0,ARTIST,TITLE,COPY,SEARCH,TIMESTAMP,KEY,DELETE};
     int count();
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
+    QList<Request> requests() {return m_requests;}
 
 private slots:
     void requestsChanged(OkjsRequests requests);

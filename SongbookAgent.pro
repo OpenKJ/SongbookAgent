@@ -19,6 +19,8 @@ TEMPLATE = app
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+DEFINES += BUILD_DATE=__DATE__
+
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -35,7 +37,9 @@ SOURCES += \
     dialogsettings.cpp \
     okjsongbookapi.cpp \
     requeststablemodel.cpp \
-    dialogupdate.cpp
+    dialogupdate.cpp \
+    dialogabout.cpp \
+    dialogupdater.cpp
 
 HEADERS += \
         songbookclient.h \
@@ -43,12 +47,16 @@ HEADERS += \
     dialogsettings.h \
     okjsongbookapi.h \
     requeststablemodel.h \
-    dialogupdate.h
+    dialogupdate.h \
+    dialogabout.h \
+    dialogupdater.h
 
 FORMS += \
         songbookclient.ui \
     dialogsettings.ui \
-    dialogupdate.ui
+    dialogupdate.ui \
+    dialogabout.ui \
+    dialogupdater.ui
 
 RESOURCES += \
     resources.qrc

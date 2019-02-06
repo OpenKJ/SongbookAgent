@@ -61,7 +61,7 @@ int RequestsTableModel::rowCount(const QModelIndex &parent) const
 int RequestsTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return 6;
+    return 8;
 }
 
 QVariant RequestsTableModel::data(const QModelIndex &index, int role) const
@@ -74,10 +74,29 @@ QVariant RequestsTableModel::data(const QModelIndex &index, int role) const
 
     if(index.row() >= m_requests.size() || index.row() < 0)
         return QVariant();
-    if ((index.column() == 5) && (role == Qt::DecorationRole))
+    if (role == Qt::ToolTipRole)
     {
-        QPixmap icon(":/resources/edit-delete.png");
-        return icon.scaled(sbSize);
+        switch(index.column())
+        {
+        case DELETE:
+            return QString("Delete request");
+        case COPY:
+            return QString("Copy artist and title to clipboard");
+        case SEARCH:
+            return QString("Search for song online in the OpenKJ Database");
+        }
+    }
+    if (role == Qt::DecorationRole)
+    {
+        switch(index.column())
+        {
+        case DELETE:
+            return QPixmap(":/resources/edit-delete.png").scaled(sbSize);
+        case COPY:
+            return QPixmap(":/resources/edit-copy-symbolic.symbolic.png").scaled(sbSize);
+        case SEARCH:
+            return QPixmap(":/resources/web-arrow-icon.png").scaled(sbSize);
+        }
     }
     if (role == Qt::TextAlignmentRole)
         switch(index.column())

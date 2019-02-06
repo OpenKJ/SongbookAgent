@@ -4,5 +4,7 @@
         <file>resources/view-refresh.png</file>
         <file>resources/edit-delete.png</file>
         <file>resources/AppIcon-blink.png</file>
+        <file>resources/edit-copy-symbolic.symbolic.png</file>
+        <file>resources/web-arrow-icon.png</file>
     </qresource>
 </RCC>
