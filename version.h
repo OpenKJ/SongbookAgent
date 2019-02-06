@@ -3,8 +3,8 @@
 
 #define VERSION_MAJOR 1
 #define VERSION_MINOR 1
-#define VERSION_BUILD 24
-#define VERSION_STRING "1.1.24"
+#define VERSION_BUILD 25
+#define VERSION_STRING "1.1.25"
 #define VERSION_BRANCH "unstable"
 
 #endif //VERSION_H
