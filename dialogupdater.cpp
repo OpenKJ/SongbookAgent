@@ -67,7 +67,7 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
     {
         qWarning() << "Launching: " << destPath;
         QProcess::startDetached(destPath);
-        QApplication::quit();
+        //QApplication::quit();
     }
     else if (os == "mac")
     {
