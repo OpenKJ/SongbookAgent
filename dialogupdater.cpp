@@ -67,13 +67,14 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
     if (os == "win32" || os == "win64")
     {
         QProcess process;
-        process.setProgram(destPath);
+        process.setProgram(aUrl.fileName());
+        process.setWorkingDirectory(destDir);
 //        process.setStandardOutputFile(QProcess::nullDevice());
 //        process.setStandardErrorFile(QProcess::nullDevice());
         qint64 pid;
         process.start();
         process.waitForFinished();
-        qWarning() << process.error();
+        qWarning() << process.error() << " - " << process.errorString();
         qWarning() << process.readAllStandardOutput();
         qWarning() << process.readAllStandardError();
 //        QApplication::quit();
