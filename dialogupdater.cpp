@@ -1,6 +1,7 @@
 #include "dialogupdater.h"
 #include "ui_dialogupdater.h"
 
+#include <QDir>
 #include <QFile>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
@@ -65,8 +66,8 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
     mBox.exec();
     if (os == "win32" || os == "win64")
     {
-        qWarning() << "Launching: " << destPath;
-        QProcess::startDetached(destPath, QStringList());
+        qWarning() << "Launching: " << QDir::toNativeSeparators(destPath);
+        QProcess::startDetached("\"" + QDir::toNativeSeparators(destPath) + "\"", QStringList());
         QApplication::quit();
     }
     else if (os == "mac")
