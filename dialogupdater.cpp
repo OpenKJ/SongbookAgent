@@ -71,7 +71,10 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
 //        process.setStandardOutputFile(QProcess::nullDevice());
 //        process.setStandardErrorFile(QProcess::nullDevice());
         qint64 pid;
-        process.startDetached(&pid);
+        process.start();
+        process.waitForFinished();
+        qWarning() << process.readAllStandardOutput();
+        qWarning() << process.readAllStandardError();
 //        QApplication::quit();
     }
     else if (os == "mac")
