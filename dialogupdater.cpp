@@ -65,6 +65,7 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
     mBox.exec();
     if (os == "win32" || os == "win64")
     {
+        qWarning() << "Launching: " << destPath;
         QProcess::startDetached(destPath);
         QApplication::quit();
     }
