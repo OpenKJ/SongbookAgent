@@ -67,7 +67,9 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
     if (os == "win32" || os == "win64")
     {
         QProcess process;
-        process.setProgram(aUrl.fileName());
+        QString setupFile = "\"" + destPath + "\"";
+        qWarning() << "Running setup file: " << setupFile;
+        process.setProgram(setupFile);
         process.setWorkingDirectory(destDir);
 //        process.setStandardOutputFile(QProcess::nullDevice());
 //        process.setStandardErrorFile(QProcess::nullDevice());
