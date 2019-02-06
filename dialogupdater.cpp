@@ -73,6 +73,7 @@ void DialogUpdater::on_pushButtonUpdate_clicked()
         qint64 pid;
         process.start();
         process.waitForFinished();
+        qWarning() << process.error();
         qWarning() << process.readAllStandardOutput();
         qWarning() << process.readAllStandardError();
 //        QApplication::quit();
