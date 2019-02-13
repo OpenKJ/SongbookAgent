@@ -50,6 +50,11 @@ importerConfig Settings::csvImporterConfig()
     return config;
 }
 
+int Settings::systemId()
+{
+    return settings->value("systemId", 1).toInt();
+}
+
 void Settings::setApiKey(QString key)
 {
     settings->setValue("apiKey", key);
@@ -88,4 +93,9 @@ void Settings::saveCsvImporterConfig(importerConfig config)
     settings->setValue("cimportSeparator", config.separator);
     settings->setValue("cimportPath", config.path);
     settings->setValue("cimportConvertUnderscore", config.convertUnderscore);
+}
+
+void Settings::setSystemId(int id)
+{
+    return settings->setValue("systemId", id);
 }
