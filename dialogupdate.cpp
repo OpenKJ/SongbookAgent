@@ -197,10 +197,7 @@ QStringList DialogUpdate::findKaroakeFiles(QString directory)
                 files.append(fn);
             else if (fn.endsWith(".cdg", Qt::CaseInsensitive))
             {
-                QString mp3filename = fn;
-                mp3filename.chop(3);
-                if ((QFile::exists(mp3filename + "mp3")) || (QFile::exists(mp3filename + "MP3")) || (QFile::exists(mp3filename + "Mp3")) || (QFile::exists(mp3filename + "mP3")))
-                    files.append(fn);
+                files.append(fn);
             }
             else if (fn.endsWith(".mkv", Qt::CaseInsensitive) || fn.endsWith(".avi", Qt::CaseInsensitive) || fn.endsWith(".wmv", Qt::CaseInsensitive) || fn.endsWith(".mp4", Qt::CaseInsensitive) || fn.endsWith(".mpg", Qt::CaseInsensitive) || fn.endsWith(".mpeg", Qt::CaseInsensitive))
                 files.append(fn);
