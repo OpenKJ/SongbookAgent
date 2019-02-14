@@ -22,6 +22,10 @@ private slots:
     void on_btnFont_clicked();
     void on_buttonBox_rejected();
     void testApiKey();
+    void entitledSystemCountChanged(int count);
+
+
+    void on_spinBoxSystemId_valueChanged(int arg1);
 
 private:
     Ui::DialogSettings *ui;

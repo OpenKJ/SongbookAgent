@@ -11,6 +11,7 @@ DialogSettings::DialogSettings(OKJSongbookAPI *sbapi, QWidget *parent) :
     ui->setupUi(this);
     loadFromSettings();
     connect(ui->btnTest, SIGNAL(clicked(bool)), this, SLOT(testApiKey()));
+    connect(sbapi, SIGNAL(entitledSystemCountChanged(int)), this, (SLOT(entitledSystemCountChanged(int))));
 
 #ifdef Q_OS_MACX
     // Disable/hide this setting since it doesn't work on Mac anyway
@@ -84,4 +85,16 @@ void DialogSettings::testApiKey()
         msgBox->exec();
         delete msgBox;
     }
+}
+
+void DialogSettings::entitledSystemCountChanged(int count)
+{
+    ui->spinBoxSystemId->setMaximum(count);
+    if (settings.systemId() <= count)
+        ui->spinBoxSystemId->setValue(settings.systemId());
+}
+
+void DialogSettings::on_spinBoxSystemId_valueChanged(int arg1)
+{
+    settings.setSystemId(arg1);
 }

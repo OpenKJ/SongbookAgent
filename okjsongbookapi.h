@@ -74,6 +74,7 @@ private:
     bool connectionReset;
     QUrl serverUrl;
     Settings settings;
+    int entitledSystems;
 
 public:
     explicit OKJSongbookAPI(QObject *parent = 0);
@@ -88,6 +89,8 @@ public:
     int numRequests();
     void alertCheck();
     void versionCheck();
+    void getEntitledSystemCount();
+    int entitledSystemCount() { return entitledSystems; }
 
 
 signals:
@@ -102,6 +105,7 @@ signals:
     void delayError(int);
     void alertReceived(QString title, QString message);
     void newVersionAvailable(QString curVersion, QString availVersion, QString branch, QString os, QString url);
+    void entitledSystemCountChanged(int count);
 
 
 public slots:

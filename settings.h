@@ -28,6 +28,7 @@ public:
     int lastVenue();
     importerConfig fileImporterConfig();
     importerConfig csvImporterConfig();
+    int systemId();
 
 signals:
     void apiKeyChanged(QString);
@@ -39,6 +40,7 @@ public slots:
     void setLastVenue(int venueId);
     void saveFileImporterConfig(importerConfig config);
     void saveCsvImporterConfig(importerConfig config);
+    void setSystemId(int id);
 
 };
 
