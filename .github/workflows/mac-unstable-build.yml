@@ -80,7 +80,7 @@ jobs:
         #find "./Songbook Agent.app"
         #mv "Songbook Agent.app" "/Applications/Songbook Agent.app"
         #find "/Applications/Songbook Agent.app"
-        pkgbuild --root "./" --component-plist ./components.plist --identifier "com.okjsongbook.agent" --install-location /Application "SongbookAgent.pkg"
+        pkgbuild --root "./" --component-plist ./components.plist --identifier "com.okjsongbook.agent" --install-location /Applications "SongbookAgent.pkg"
         #productbuild --identifier com.okjsongbook.agent --version `grep VERSION_STRING version.h | cut -d'"' -f2` --component "/Applications/Songbook Agent.app" SongbookAgent.pkg
         productsign --sign "Developer ID Installer: Isaac Lightburn (47W8CPBS5A)" SongbookAgent.pkg OpenKJ-Songbook-Agent-`grep VERSION_STRING version.h | cut -d'"' -f2`-unstable-osx-installer.pkg
 
