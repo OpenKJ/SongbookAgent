@@ -46,7 +46,7 @@ jobs:
         security unlock-keychain -p '${{ secrets.MAC_P12_PASS }}' build.keychain
         security set-keychain-settings -t 3600 -u build.keychain
         security import ${{ steps.write_file_appcert.outputs.filePath }} -k build.keychain -P '${{ secrets.MAC_P12_PASS }}' -A
-        security import ${{ steps.write_file_installcert.outputs.filePath }} -k build.keychain -P '${{ secrets.MAC_P12_PASS }}' -A
+        security import ${{ steps.write_file_installercert.outputs.filePath }} -k build.keychain -P '${{ secrets.MAC_P12_PASS }}' -A
         security set-key-partition-list -S apple-tool:,apple: -s -k '${{ secrets.MAC_P12_PASS }}' build.keychain
 
     - name: Cache Qt
