@@ -77,12 +77,15 @@ jobs:
 
     - name: Create installer
       run: |
+        mkdir fakeroot
+        mkdir fakeroot/Applications
+        mv "Songbook Agent.app" fakeroot/Applications
         #find "./Songbook Agent.app"
         #mv "Songbook Agent.app" "/Applications/Songbook Agent.app"
         #find "/Applications/Songbook Agent.app"
-        pkgbuild --root "./" --component-plist ./components.plist --identifier "com.okjsongbook.agent" --install-location "/Applications/Songbook Agent.app" "SongbookAgent.pkg"
+        pkgbuild --root "fakeroot" --component-plist components.plist --identifier "com.okjsongbook.agent" --sign "Developer ID Installer: Isaac Lightburn (47W8CPBS5A)" OpenKJ-Songbook-Agent-`grep VERSION_STRING version.h | cut -d'"' -f2`-unstable-osx-installer.pkg
         #productbuild --identifier com.okjsongbook.agent --version `grep VERSION_STRING version.h | cut -d'"' -f2` --component "/Applications/Songbook Agent.app" SongbookAgent.pkg
-        productsign --sign "Developer ID Installer: Isaac Lightburn (47W8CPBS5A)" SongbookAgent.pkg OpenKJ-Songbook-Agent-`grep VERSION_STRING version.h | cut -d'"' -f2`-unstable-osx-installer.pkg
+        #productsign --sign "Developer ID Installer: Isaac Lightburn (47W8CPBS5A)" SongbookAgent.pkg OpenKJ-Songbook-Agent-`grep VERSION_STRING version.h | cut -d'"' -f2`-unstable-osx-installer.pkg
 
     - name: Upload installer to Google Cloud Storage
       run: |
