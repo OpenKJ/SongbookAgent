@@ -82,7 +82,7 @@ jobs:
     - name: Create installer
       run: |
         mv "Songbook Agent.app" "/Applications/Songbook Agent.app"
-        productbuild --identifier com.okjsongbook.agent --version `grep VERSION_STRING version.h | cut -d'"' -f2` --component "/Applications/Songbook Agent.app" SongbookAgent.pkg
+        productbuild --identifier com.okjsongbook.agent --version `grep VERSION_STRING version.h | cut -d'"' -f2` --component "/Applications/Songbook Agent.app" "/Applications/Songbook Agent.app" SongbookAgent.pkg
         productsign --sign "Developer ID Installer: Isaac Lightburn (47W8CPBS5A)" SongbookAgent.pkg OpenKJ-Songbook-Agent-`grep VERSION_STRING version.h | cut -d'"' -f2`-unstable-osx-installer.dmg
 # Runs a set of commands using the runners shell
 #    - name: Remove non-appstore compliant plugins
