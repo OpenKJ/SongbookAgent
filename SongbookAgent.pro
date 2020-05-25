@@ -12,6 +12,10 @@ win32: RC_ICONS = resources/AppIcon.ico
 
 TARGET = SongbookAgent
 TEMPLATE = app
+QMAKE_TARGET_COMPANY = The OpenKJ Project
+QMAKE_TARGET_PRODUCT = Songbook Agent
+QMAKE_TARGET_DESCRIPTION = OpenKJ Songbook Standalone Agent
+QMAKE_TARGET_BUNDLE_PREFIX = com.okjsongbook
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
