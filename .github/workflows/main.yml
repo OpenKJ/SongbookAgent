@@ -25,6 +25,15 @@ jobs:
         SAVER=`grep VERSION_STRING version.h | cut -d'"' -f2`
         echo "Version: $SAVER"
 
+    - name: Installing gcloud console tools
+      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+      #  project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCLOUD_KEY }}
+        export_default_credentials: true
+    - run: gcloud info
+
     - name: Decode app signing cert
       id: write_file_appcert
       uses: timheuer/base64-to-file@v1.0.3
