@@ -44,7 +44,7 @@ jobs:
       run: mv SongbookAgent.app "Songbook Agent.app"
     
     - name: Run macdeployqt
-      run: macdeployqt -appstore-compliant "Songbook Agent.app"
+      run: macdeployqt "Songbook Agent.app" -appstore-compliant
 
 # Runs a set of commands using the runners shell
 #    - name: Remove non-appstore compliant plugins
