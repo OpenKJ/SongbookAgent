@@ -1,4 +1,4 @@
-name: MacOS Build
+name: MacOS Builder
 
 on:
   push:
@@ -12,8 +12,17 @@ jobs:
 
     - name: Get version
       run: |
-        SAVER=`grep VERSION_STRING version.h | cut -d'"' -f2`
-        echo "Version: $SAVER"
+        BRANCH=${GITHUB_REF##*/}
+        if [ "$BRANCH" = "master" ];then
+        RTYPE="unstable"
+        else
+        RTYPE=$BRANCH
+        fi
+        SBVER=`grep VERSION_STRING version.h | cut -d'"' -f2`
+        echo "Songbook Agent Version: $SBVER"
+        echo "Git Branch: $BRANCH"
+        FN="OpenKJ-Songbook-Agent-${SBVER}-${RTYPE}-osx-installer.pkg"
+        echo "Output Package Filename: $FN"
 
     - name: Installing gcloud console tools
       uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
