@@ -105,8 +105,7 @@ jobs:
         while [ $DONE -lt 1 ]
         do
         sleep 10
-        xcrun altool --notarization-info $UUID --apiKey ${{ secrets.APPLE_API_KEY }} --apiIssuer "${{ secrets.APPLE_API_ISSUER }}" &>notout.txt 
-        cat notout.txt
+        xcrun altool --notarization-info $UUID --apiKey ${{ secrets.APPLE_API_KEY }} --apiIssuer "${{ secrets.APPLE_API_ISSUER }}" | tee notout.txt 
         STATUS=`grep "Status:" notout.txt | cut -d':' -f2`
         if [ $? -ne 0 ];then
         STATUS=" unknown"
