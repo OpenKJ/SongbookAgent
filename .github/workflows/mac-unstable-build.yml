@@ -103,7 +103,7 @@ jobs:
         DONE=0
         while [ $DONE -lt 1 ]
         do
-        STATUS=`xcrun altool --notarization-info $UUID --apiKey ${{ secrets.APPLE_API_KEY }} --apiIssuer "${{ $secrets.APPLE_API_ISSUER }}" | grep "Status:" | cut -d':' -f2`
+        STATUS=`xcrun altool --notarization-info $UUID --apiKey ${{ secrets.APPLE_API_KEY }} --apiIssuer "${{ secrets.APPLE_API_ISSUER }}" | grep "Status:" | cut -d':' -f2`
         echo "Current Stauts: $STATUS"
          
         if [ $STATUS = " in progress" ];then
