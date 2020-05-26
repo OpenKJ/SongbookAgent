@@ -2,7 +2,7 @@ name: MacOS Build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, release ]
 
 jobs:
   build:
@@ -19,7 +19,6 @@ jobs:
       uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
-      #  project_id: ${{ secrets.GCP_PROJECT_ID }}
         service_account_key: ${{ secrets.GCLOUD_KEY }}
         export_default_credentials: true
 
@@ -37,13 +36,6 @@ jobs:
         fileName: 'installer.p12'
         encodedString: ${{ secrets.MAC_INSTALLER_CERT_BASE64 }}
 
-    - name: Decode API key
-      id: write_file_apikey
-      uses: timheuer/base64-to-file@v1.0.3
-      with:
-        fileName: 'AuthKey_NX427TPKN7.p8'
-        encodedString: ${{ secrets.APPLE_API_KEY_BASE64 }}
-
     - name: Setting up signing environment
       run: |
         security create-keychain -p '${{ secrets.MAC_P12_PASS }}' build.keychain
@@ -55,7 +47,6 @@ jobs:
         security set-key-partition-list -S apple-tool:,apple: -s -k '${{ secrets.MAC_P12_PASS }}' build.keychain
         mkdir ~/private_keys
         echo "${{ secrets.APPLE_API_KEY_PLAINTEXT }}" > ~/private_keys/AuthKey_NX427TPKN7.p8
-        #cp ${{ steps.write_file_apikey.outputs.filePath }} ~/private_keys/
 
     - name: Cache Qt
       id: cache-qt
@@ -92,20 +83,27 @@ jobs:
         mv "Songbook Agent.app" fakeroot/Applications
         pkgbuild --root "fakeroot" --component-plist components.plist --identifier "com.okjsongbook.agent" --sign "Developer ID Installer: Isaac Lightburn (47W8CPBS5A)" OpenKJ-Songbook-Agent-`grep VERSION_STRING version.h | cut -d'"' -f2`-unstable-osx-installer.pkg
         
-
     - name: Notarize
       run: |
+        BRANCH=${GITHUB_REF##*/}
+        if [ "$BRANCH" = "master" ];then
+        RTYPE="unstable"
+        else
+        RTYPE=$BRANCH
+        fi
         SBVER=`grep VERSION_STRING version.h | cut -d'"' -f2`
         echo "SBA Version: $SBVER"
-        FN="OpenKJ-Songbook-Agent-${SBVER}-unstable-osx-installer.pkg"
+        FN="OpenKJ-Songbook-Agent-${SBVER}-${RTYPE}-osx-installer.pkg"
         echo "Package filename: $FN"
         UUID=`xcrun altool --notarize-app --primary-bundle-id "com.okjsongbook.agent" --file $FN --apiKey ${{ secrets.APPLE_API_KEY }}  --apiIssuer "${{ secrets.APPLE_API_ISSUER }}" | grep RequestUUID | cut -d' ' -f3`
         echo "Notarization UUID: $UUID"
+        
+        echo "Waiting for Apple notarization service..."
         DONE=0
         while [ $DONE -lt 1 ]
         do
         
-        sleep 10
+        sleep 15
         
         xcrun altool --notarization-info $UUID --apiKey ${{ secrets.APPLE_API_KEY }} --apiIssuer "${{ secrets.APPLE_API_ISSUER }}" | tee notout.txt 
         if [ $? -ne 0 ];then
@@ -136,6 +134,7 @@ jobs:
         if [ $DONE -eq 1 ];then
         echo "Notarization successful, stapling installer"
         xcrun stapler staple $FN
+        return $?
         else
         echo "Error notarizing!"
         return -1
@@ -143,6 +142,17 @@ jobs:
 
     - name: Upload installer to Google Cloud Storage
       run: |
-        gsutil cp OpenKJ-Songbook-Agent-`grep VERSION_STRING version.h | cut -d'"' -f2`-unstable-osx-installer.pkg  gs://openkj-songbook-agent/macos/unstable/
+        BRANCH=${GITHUB_REF##*/}
+        if [ "$BRANCH" = "master" ];then
+        RTYPE="unstable"
+        else
+        RTYPE=$BRANCH
+        fi
+        SBVER=`grep VERSION_STRING version.h | cut -d'"' -f2`
+        echo "SBA Version: $SBVER"
+        FN="OpenKJ-Songbook-Agent-${SBVER}-${RTYPE}-osx-installer.pkg"
+        
+        echo "Package filename: $FN"
+        gsutil cp $FN gs://openkj-songbook-agent/macos/$RTYPE/
 
 
