@@ -37,6 +37,13 @@ jobs:
         fileName: 'installer.p12'
         encodedString: ${{ secrets.MAC_INSTALLER_CERT_BASE64 }}
 
+    - name: Decode API key
+      id: write_file_apikey
+      uses: timheuer/base64-to-file@v1.0.3
+      with:
+        fileName: 'AuthKey_NX427TPKN7.p8'
+        encodedString: ${{ secrets.APPLE_API_KEY_BASE64 }}
+
     - name: Setting up signing environment
       run: |
         security create-keychain -p '${{ secrets.MAC_P12_PASS }}' build.keychain
@@ -46,6 +53,8 @@ jobs:
         security import ${{ steps.write_file_appcert.outputs.filePath }} -k build.keychain -P '${{ secrets.MAC_P12_PASS }}' -A
         security import ${{ steps.write_file_installercert.outputs.filePath }} -k build.keychain -P '${{ secrets.MAC_P12_PASS }}' -A
         security set-key-partition-list -S apple-tool:,apple: -s -k '${{ secrets.MAC_P12_PASS }}' build.keychain
+        mkdir ~/private_keys
+        cp ${{ steps.write_file_apikey.outputs.filePath }} ~/private_keys/
 
     - name: Cache Qt
       id: cache-qt
@@ -73,19 +82,51 @@ jobs:
 
     - name: Sign app bundle
       run: |
-        codesign -s "Developer ID Application: Isaac Lightburn (47W8CPBS5A)" -vvvv --deep "Songbook Agent.app"
+        codesign -s "Developer ID Application: Isaac Lightburn (47W8CPBS5A)" --identifier "com.okjsongbook.agent" -vvvv --deep --options=runtime "Songbook Agent.app"
 
     - name: Create installer
       run: |
         mkdir fakeroot
         mkdir fakeroot/Applications
         mv "Songbook Agent.app" fakeroot/Applications
-        #find "./Songbook Agent.app"
-        #mv "Songbook Agent.app" "/Applications/Songbook Agent.app"
-        #find "/Applications/Songbook Agent.app"
         pkgbuild --root "fakeroot" --component-plist components.plist --identifier "com.okjsongbook.agent" --sign "Developer ID Installer: Isaac Lightburn (47W8CPBS5A)" OpenKJ-Songbook-Agent-`grep VERSION_STRING version.h | cut -d'"' -f2`-unstable-osx-installer.pkg
-        #productbuild --identifier com.okjsongbook.agent --version `grep VERSION_STRING version.h | cut -d'"' -f2` --component "/Applications/Songbook Agent.app" SongbookAgent.pkg
-        #productsign --sign "Developer ID Installer: Isaac Lightburn (47W8CPBS5A)" SongbookAgent.pkg OpenKJ-Songbook-Agent-`grep VERSION_STRING version.h | cut -d'"' -f2`-unstable-osx-installer.pkg
+        
+
+    - name: Notarize
+      run: |
+        SBVER=`grep VERSION_STRING version.h | cut -d'"' -f2`
+        echo "SBA Version: $SBVER"
+        FN="OpenKJ-Songbook-Agent-${SBVER}-unstable-osx-installer.pkg"
+        echo "Package filename: $FN"
+        UUID=`xcrun altool --notarize-app --primary-bundle-id "com.okjsongbook.agent" --file $FN --apiKey ${{ secrets.APPLE_API_KEY }}  --apiIssuer "${{ secrets.APPLE_API_ISSUER }}" | grep RequestUUID | cut -d' ' -f3`
+        echo "Notarization UUID: $UUID"
+        DONE=0
+        while [ $DONE -lt 1 ]
+        do
+        STATUS=`xcrun altool --notarization-info $UUID --apiKey ${{ secrets.APPLE_API_KEY }} --apiIssuer "${{ $secrets.APPLE_API_ISSUER }}" | grep "Status:" | cut -d':' -f2`
+        echo "Current Stauts: $STATUS"
+         
+        if [ $STATUS = " in progress" ];then
+        DONE=0
+        fi
+        
+        if [ $STATUS = ' invalid' ];then
+        DONE=2
+        fi
+        
+        if [ $STATUS = ' success' ];then
+        DONE=1
+        fi
+        
+        done
+        
+        if [ $DONE -eq 1 ];then
+        echo "Notarization successful, stapling installer"
+        xcrun stapler staple $FN
+        else
+        echo "Error notarizing!"
+        return -1
+        fi
 
     - name: Upload installer to Google Cloud Storage
       run: |
