@@ -104,10 +104,18 @@ jobs:
         DONE=0
         while [ $DONE -lt 1 ]
         do
-        sleep 5
-        STATUS=`xcrun altool --notarization-info $UUID --apiKey ${{ secrets.APPLE_API_KEY }} --apiIssuer "${{ secrets.APPLE_API_ISSUER }}" | grep "Status:" | cut -d':' -f2`
+        sleep 10
+        xcrun altool --notarization-info $UUID --apiKey ${{ secrets.APPLE_API_KEY }} --apiIssuer "${{ secrets.APPLE_API_ISSUER }}" &>notout.txt 
+        cat notout.txt
+        STATUS=`grep "Status:" notout.txt | cut -d':' -f2`
+        if [ $? -ne 0 ];then
+        STATUS=" unknown"
+        echo "Error response from altool"
+        continue
+        fi
+        
         echo "Current Stauts: $STATUS"
-         
+        
         if [ $STATUS = " in progress" ];then
         DONE=0
         continue
