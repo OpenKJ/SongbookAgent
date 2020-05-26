@@ -54,7 +54,8 @@ jobs:
         security import ${{ steps.write_file_installercert.outputs.filePath }} -k build.keychain -P '${{ secrets.MAC_P12_PASS }}' -A
         security set-key-partition-list -S apple-tool:,apple: -s -k '${{ secrets.MAC_P12_PASS }}' build.keychain
         mkdir ~/private_keys
-        cp ${{ steps.write_file_apikey.outputs.filePath }} ~/private_keys/
+        echo "${{ secrets.APPLE_API_KEY_PLAINTEXT }}" > ~/private_keys/AuthKey_NX427TPKN7.p8
+        #cp ${{ steps.write_file_apikey.outputs.filePath }} ~/private_keys/
 
     - name: Cache Qt
       id: cache-qt
@@ -103,15 +104,18 @@ jobs:
         DONE=0
         while [ $DONE -lt 1 ]
         do
+        sleep 5
         STATUS=`xcrun altool --notarization-info $UUID --apiKey ${{ secrets.APPLE_API_KEY }} --apiIssuer "${{ secrets.APPLE_API_ISSUER }}" | grep "Status:" | cut -d':' -f2`
         echo "Current Stauts: $STATUS"
          
         if [ $STATUS = " in progress" ];then
         DONE=0
+        continue
         fi
         
         if [ $STATUS = ' invalid' ];then
         DONE=2
+        continue
         fi
         
         if [ $STATUS = ' success' ];then
