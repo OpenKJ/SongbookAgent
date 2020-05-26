@@ -143,10 +143,10 @@ jobs:
         if [ $DONE -eq 1 ];then
         echo "Notarization successful, stapling installer"
         xcrun stapler staple $FN
-        return $?
+        exit $?
         else
         echo "Error notarizing!"
-        return -1
+        exit 1
         fi
 
     - name: Upload installer to Google Cloud Storage
