@@ -71,7 +71,7 @@ jobs:
 
     - name: Sign app bundle
       run: |
-        codesign -s "Developer ID Application: Isaac Lightburn (47W8CPBS5A)" -vvvv --deep --options=runtime "Songbook Agent.app"
+        codesign -s "Developer ID Application: Isaac Lightburn (47W8CPBS5A)" --identifier "com.okjsongbook.agent" -vvvv --deep --options=runtime "Songbook Agent.app"
     - name: Create installer
       run: |
         mkdir fakeroot
