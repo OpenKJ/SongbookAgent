@@ -355,7 +355,7 @@ void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
             return;
         }
         QString curVersion = QString(VERSION_STRING);
-        QString branch(VERSION_BRANCH);
+        QString branch("stable");
         QString versionKey = branch + "_" + os;
         QString urlKey = branch + "_url_" + os;
         qWarning() << "version key: " << versionKey << " url key:" << urlKey;
