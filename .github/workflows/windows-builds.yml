@@ -55,6 +55,7 @@ jobs:
         sed -i "s/#define MyAppVersion.*/#define MyAppVersion \"${{ steps.get_version.outputs.version-without-v }}\"/" windows/openkj-songbook-agent_x86.iss
         sed -i "s/#define MyAppVersion.*/#define MyAppVersion \"${{ steps.get_version.outputs.version-without-v }}\"/" windows/openkj-songbook-agent_x86_64.iss
         sed -i "s/#define MyAppVersion.*/#define MyAppVersion \"${{ steps.get_version.outputs.version-without-v }}\"/" cd/openkj${{ matrix.bits }}.iss
+      shell: bash
 
     - name: Update version.h
       run: |
@@ -69,6 +70,7 @@ jobs:
         echo "#define VERSION_BRANCH \"${{ env.rtype }}\"" >> src/okjversion.h
         echo >> src/version.h
         echo "#endif //VERSION_H" >> src/version.h
+      shell: bash
 
     - name: Download OpenSSL dll files
       if: steps.cache-downloads.outputs.cache-hit != 'true'
