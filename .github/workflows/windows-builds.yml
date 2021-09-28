@@ -108,10 +108,10 @@ jobs:
     - name: Create output dir and copy exe
       run: |
         mkdir output
-        copy build\openkj.exe output\
+        copy build\SongbookAgent.exe output\
     - name: Run windeployqt
       run: |
-        windeployqt --release --compiler-runtime output/openkj.exe
+        windeployqt --release --compiler-runtime output/SongbookAgent.exe
         dir output
       shell: cmd
 
