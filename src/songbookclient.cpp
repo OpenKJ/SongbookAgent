@@ -8,6 +8,10 @@
 #include <qevent.h>
 #include "dialogupdater.h"
 
+#ifdef Q_OS_WIN
+#include <QtPlatformHeaders/QWindowsWindowFunctions>
+#endif
+
 SongbookClient::SongbookClient(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::SongbookClient)
