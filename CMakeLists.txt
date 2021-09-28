@@ -35,8 +35,8 @@ include_directories(
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
-	message("Linux or BSD detected")
-	# Linux/BSD specific stuff
+    message("Linux or BSD detected")
+    # Linux/BSD specific stuff
 endif ()
 
 
@@ -46,37 +46,37 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	message("Windows detected")
-	# Windows specific stuff
-   	set(WINDOWS_ICON_RC "appicon.rc")
+    message("Windows detected")
+    # Windows specific stuff
+    set(WINDOWS_ICON_RC "appicon.rc")
 endif ()
 
 set(SOURCE_FILES
+        resources.qrc
         src/dialogabout.cpp
-	src/dialogabout.h
-	src/dialogabout.ui
-	src/dialogsettings.cpp
-	src/dialogsettings.h
-	src/dialogsettings.ui
-	src/dialogupdate.cpp
-	src/dialogupdate.h
-	src/dialogupdater.cpp
-	src/dialogupdater.h
-	src/dialogupdater.ui
-	src/dialogupdate.ui
-	src/main.cpp
-	src/okjsongbookapi.cpp
-	src/okjsongbookapi.h
-	src/requeststablemodel.cpp
-	src/requeststablemodel.h
-	src/settings.cpp
-	src/settings.h
-	src/songbookclient.cpp
-	src/songbookclient.h
-	src/songbookclient.ui
-	src/version.h
-	resources.qrc
-	)
+        src/dialogabout.h
+        src/dialogabout.ui
+        src/dialogsettings.cpp
+        src/dialogsettings.h
+        src/dialogsettings.ui
+        src/dialogupdate.cpp
+        src/dialogupdate.h
+        src/dialogupdater.cpp
+        src/dialogupdater.h
+        src/dialogupdater.ui
+        src/dialogupdate.ui
+        src/main.cpp
+        src/okjsongbookapi.cpp
+        src/okjsongbookapi.h
+        src/requeststablemodel.cpp
+        src/requeststablemodel.h
+        src/settings.cpp
+        src/settings.h
+        src/songbookclient.cpp
+        src/songbookclient.h
+        src/songbookclient.ui
+        src/version.h
+        )
 
 set(LIBRARIES
         Qt5::Widgets
@@ -89,25 +89,25 @@ set(LIBRARIES
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
-	add_executable(SongbookAgent
+    add_executable(SongbookAgent
             ${SOURCE_FILES}
             )
     target_link_libraries(SongbookAgent ${LIBRARIES})
 
     install(
-	    TARGETS SongbookAgent 
+            TARGETS SongbookAgent
             DESTINATION bin
     )
     install(
-	    FILES src/Icons/org.openkj.SongbookAgent.svg
+            FILES src/Icons/org.openkj.SongbookAgent.svg
             DESTINATION share/icons/hicolor/scalable/apps
     )
     install(
-	    FILES src/org.openkj.SongbookAgent.desktop
+            FILES src/org.openkj.SongbookAgent.desktop
             DESTINATION share/applications
     )
     install(
-	    FILES src/org.openkj.SongbookAgent.metainfo.xml
+            FILES src/org.openkj.SongbookAgent.metainfo.xml
             DESTINATION share/metainfo
     )
 endif ()
@@ -194,7 +194,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                 add_custom_command(
                         TARGET SongbookAgent
                         COMMAND "${WINDEPLOYQT}"
-			ARGS "${CMAKE_BINARY_DIR}\\SongbookAgent.exe"
+                        ARGS "${CMAKE_BINARY_DIR}\\SongbookAgent.exe"
                 )
             else ()
                 message("Can't find windeployqt")

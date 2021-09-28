@@ -1,0 +1,177 @@
+name: Windows Builds
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build:
+    name: Windows Builds
+    runs-on: windows-2019
+    strategy:
+      matrix: 
+        include:
+          - windows-arch: 32
+            bits: 32
+            arch: x86
+            msvcarch: x86
+            qtarch: win32_msvc2019
+          - windows-arch: 64
+            bits: 64
+            arch: x86_64
+            msvcarch: x64
+            qtarch: win64_msvc2019_64
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Get version from git tag
+      id: get_version
+      uses: battila7/get-version-action@v2
+
+    - name: Setup verion env vars
+      run: |
+            if [ "${{ steps.get_version.outputs.is-semver }}" = "true" ];then
+              if [ "${{ steps.get_version.outputs.prerelease }}" = "" ];then
+                RTYPE="release"
+              else
+                RTYPE="unstable"
+              fi
+              VER=${{ steps.get_version.outputs.version-without-v }}
+            fi
+            BLDDATE=$(date +'%Y-%m-%d')
+            echo "rtype=${RTYPE}" >> $GITHUB_ENV
+            echo "ver=${VER}" >> $GITHUB_ENV
+            echo "installer_fn=OpenKJ-Songbook-Agent-setup-Windows-${{ matrix.bits }}bit.exe" >> $GITHUB_ENV
+            echo "OpenKJ Songbook Agent Version: $VER"
+          shell: bash
+
+    - name: Update Windows installer config files
+      run: |
+            sed -i "s/#define MyAppVersion.*/#define MyAppVersion \"${{ steps.get_version.outputs.version-without-v }}\"/" windows/openkj-songbook-agent_x86.iss
+            sed -i "s/#define MyAppVersion.*/#define MyAppVersion \"${{ steps.get_version.outputs.version-without-v }}\"/" windows/openkj-songbook-agent_x86_64.iss
+
+    - name: Update version.h
+      run: |
+            echo "Updating okjversion.h"
+            echo "#ifndef VERSION_H" > src/version.h
+            echo "#define VERSION_H" >> src/version.h
+            echo >> src/version.h
+            echo "#define VERSION_MAJOR ${{ steps.get_version.outputs.major }}" >> src/version.h
+            echo "#define VERSION_MINOR ${{ steps.get_version.outputs.minor }}" >> src/version.h
+            echo "#define VERSION_BUILD ${{ steps.get_version.outputs.patch }}" >> src/version.h
+            echo "#define VERSION_STRING \"${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}.${{ steps.get_version.outputs.patch }}\"" >> src/version.h
+            echo "#define VERSION_BRANCH \"${{ env.rtype }}\"" >> src/okjversion.h
+            echo >> src/version.h
+            echo "#endif //VERSION_H" >> src/version.h
+
+    - name: Download OpenSSL dll files
+      if: steps.cache-downloads.outputs.cache-hit != 'true'
+      uses: carlosperate/download-file-action@v1.0.3
+      id: download-openssl
+      with:
+        file-url: 'https://storage.googleapis.com/okj-installer-deps/ssl-${{ matrix.arch }}-1.1.1.zip'
+        file-name: openssl.zip
+        location: /cached-downloads
+
+    - name: Cache Qt
+      id: cache-qt
+      uses: actions/cache@v2
+      with:
+       path: "D:/a/OpenKJ/Qt"
+       key: ${{ runner.os }}-QtCache-5.15.2-${{ matrix.arch }}-2
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+       cached: ${{ steps.cache-qt.outputs.cache-hit }}
+       version: '5.15.2'
+       arch: ${{ matrix.qtarch }}
+       modules: 'core gui sql network widgets concurrent svg printsupport'
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Set up Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: ${{ matrix.msvcarch }}
+
+    - name: Configure CMake
+      shell: cmd
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake .. -DCMAKE_BUILD_TYPE=Release -G Ninja
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --build . --parallel 4
+
+    - name: Create output dir and copy exe
+      run: |
+        mkdir output
+        copy build\openkj.exe output\
+    - name: Run windeployqt
+      run: |
+        windeployqt --release --compiler-runtime output/openkj.exe
+        dir output
+      shell: cmd
+
+    - name: Copy in other dependencies
+      run: |
+        copy LICENSE output\LICENSE.txt
+        7z e -bb3 -y ${{ steps.download-openssl.outputs.file-path }} -o"output\"
+
+    - name: Sign Songbook Agent executable
+      run: |
+        mkdir cscrt
+        7z e windows/cscrt.7z -p"${{ secrets.WIN_CSCRT_ARCHIVE_PASS }}" -ocscrt/
+        signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f cscrt\cscrt.pfx /p "${{ secrets.WIN_CSCRT_PFX_PASS }}" output/SongbookAgent.exe
+      shell: cmd
+
+    - name: Create Installer
+      run: |
+        cp windows/openkj-songbook-agent_${{ matrix.arch }}.iss inst.iss
+        mkdir installer
+        "%programfiles(x86)%\Inno Setup 6\iscc.exe" inst.iss /Oinstaller\
+      shell: cmd
+
+    - name: Sign Installer
+      run: |
+        signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f cscrt\cscrt.pfx /p "${{ secrets.WIN_CSCRT_PFX_PASS }}" installer\openkj-songbook-agent.exe
+      shell: cmd
+
+    - name: Rename Installer
+      run: |
+        mkdir installer/${{ env.branch }}
+        mv installer/openkj-songbook-agent.exe installer/${{ env.branch }}/${{ env.installer_fn }}
+      shell: bash
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: steps.get_version.outputs.is-semver == 'true'
+      with:
+        files: installer/${{ env.branch }}/${{ env.installer_fn }}
+        prerelease: ${{ env.rtype != 'release' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#    - name: Upload to OpenKJ website
+#      id: upload_installer
+#      if: steps.get_version.outputs.is-semver == 'true'
+#      uses: google-github-actions/upload-cloud-storage@main
+#      with:
+#        credentials: ${{ secrets.gcp_credentials }}
+#        path: installer/${{ env.branch }}/${{ env.installer_fn }}
+#        destination: openkj-installers/windows/${{ env.branch }}
+
+    - name: Upload installer artifact
+      id: upload_artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Win${{ matrix.bits }} installer
+        path: installer/${{ env.branch }}/${{ env.installer_fn }}

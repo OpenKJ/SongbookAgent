@@ -17,8 +17,8 @@
    <string>Update Song Database</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/resources/AppIcon.png</normaloff>:/resources/AppIcon.png</iconset>
+   <iconset resource="../resources.qrc">
+    <normaloff>:/resources/org.openkj.SongbookAgent.svg</normaloff>:/resources/org.openkj.SongbookAgent.svg</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -393,7 +393,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

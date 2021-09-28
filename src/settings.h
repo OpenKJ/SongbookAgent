@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QSettings>
 #include <QFont>
+#include <QWidget>
+#include <QTableView>
 
 class importerConfig
 {
@@ -41,7 +43,11 @@ public slots:
     void saveFileImporterConfig(importerConfig config);
     void saveCsvImporterConfig(importerConfig config);
     void setSystemId(int id);
+    bool restoreColumnWidths(QTableView *tableView);
+    void saveColumnWidths(QTableView *tableView);
 
+    void restoreWindowState(QWidget *window);
+    void saveWindowState(QWidget *window);
 };
 
 #endif // SETTINGS_H

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>200</height>
+    <width>293</width>
+    <height>138</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,13 +54,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="labelBuildDate">
-     <property name="text">
-      <string>Build Date:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <spacer name="verticalSpacer_2">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -68,7 +61,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>50</height>
+       <height>20</height>
       </size>
      </property>
     </spacer>

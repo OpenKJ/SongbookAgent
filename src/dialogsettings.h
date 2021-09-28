@@ -34,6 +34,9 @@ private:
     void loadFromSettings();
     OKJSongbookAPI *sbApi;
 
+    signals:
+    void fontChanged(const QFont &font);
+
 };
 
 #endif // DIALOGSETTINGS_H

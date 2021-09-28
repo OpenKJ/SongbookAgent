@@ -459,6 +459,8 @@ void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
         }
         if (requests != l_requests)
         {
+            if (containsNewRequests(requests, l_requests))
+                emit newRequestsReceived();
             requests = l_requests;
             emit requestsChanged(requests);
         }
@@ -506,6 +508,17 @@ void OKJSongbookAPI::timerTimeout()
 void OKJSongbookAPI::setInterval(int interval)
 {
     timer->setInterval(interval * 1000);
+}
+
+bool OKJSongbookAPI::containsNewRequests(const OkjsRequests &previous, const OkjsRequests &current) {
+
+    for (const auto &request : current)
+    {
+        auto result = std::find(previous.begin(), previous.end(), request);
+        if (result == previous.end())
+            return true;
+    }
+    return false;
 }
 
 bool OkjsVenue::operator ==(const OkjsVenue &v) const

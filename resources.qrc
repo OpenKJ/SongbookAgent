@@ -9,5 +9,9 @@
         <file>resources/org.openkj.SongbookAgent-blink.svg</file>
         <file>resources/org.openkj.SongbookAgent.ico</file>
         <file>resources/org.openkj.SongbookAgent.svg</file>
+        <file>resources/refresh.svg</file>
+        <file>resources/delete.svg</file>
+        <file>resources/copy.svg</file>
+        <file>resources/web-search.svg</file>
     </qresource>
 </RCC>

@@ -1,0 +1,71 @@
+name: Windows build test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Windows Builds
+    runs-on: windows-2019
+    strategy:
+      matrix: 
+        include:
+          - windows-arch: 32
+            bits: 32
+            arch: x86
+            msvcarch: x86
+            qtarch: win32_msvc2019
+          - windows-arch: 64
+            bits: 64
+            arch: x86_64
+            msvcarch: x64
+            qtarch: win64_msvc2019_64
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Cache Qt
+      id: cache-qt
+      uses: actions/cache@v2
+      with:
+       path: "D:/a/OpenKJ/Qt"
+       key: ${{ runner.os }}-QtCache-5.15.2-${{ matrix.arch }}-2
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+       cached: ${{ steps.cache-qt.outputs.cache-hit }}
+       version: '5.15.2'
+       arch: ${{ matrix.qtarch }}
+       modules: 'core gui network widgets concurrent svg'
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Set up Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: ${{ matrix.msvcarch }}
+
+    - name: Configure CMake
+      shell: cmd
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake .. -DCMAKE_BUILD_TYPE=Release -G Ninja
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --build . --parallel 4
+
+    - name: Upload executable artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Windows ${{ matrix.arch }} binary
+        path: build/SongbookAgent.exe

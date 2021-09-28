@@ -13,55 +13,73 @@ SongbookClient::SongbookClient(QWidget *parent) :
     ui(new Ui::SongbookClient)
 {
     ui->setupUi(this);
-    sbApi = new OKJSongbookAPI(this);
-    sbApi->versionCheck();
-    icon = new QSystemTrayIcon(this);
-    icon->setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent.svg")));
-    icon->show();
-    dlgSettings = new DialogSettings(sbApi,this);
-    dlgUpdate = new DialogUpdate(sbApi, this);
-    dlgAbout = new DialogAbout(this);
-    reqModel = new RequestsTableModel(sbApi, this);
-    ui->tableView->setModel(reqModel);
-    blinkTimer = new QTimer(this);
-    blinkTimer->start(500);
-    showAction = new QAction(tr("Show"), this);
-    hideAction = new QAction(tr("Hide"), this);
-    exitAction = new QAction(tr("Exit"), this);
-    iconMenu = new QMenu(this);
-    iconMenu->addAction(showAction);
-    iconMenu->addAction(hideAction);
-    iconMenu->addAction(exitAction);
+    ui->btnRefresh->setIcon(QIcon(QPixmap(":/resources/refresh.svg")));
+    m_sbApi.versionCheck();
+    m_icon.show();
+    m_dlgSettings = new DialogSettings(&m_sbApi, this);
+    m_dlgUpdate = new DialogUpdate(&m_sbApi, this);
+    m_dlgAbout = new DialogAbout(this);
+    ui->tableView->setItemDelegate(&m_reqDelegate);
+    ui->tableView->setModel(&m_reqModel);
+    m_blinkTimer.start(500);
+    m_iconMenu.addAction(&m_showAction);
+    m_iconMenu.addAction(&m_hideAction);
+    m_iconMenu.addAction(&m_exitAction);
 #ifndef Q_OS_MACX
-    icon->setContextMenu(iconMenu);
+    m_icon.setContextMenu(&m_iconMenu);
 #endif
 #ifdef Q_OS_WIN
     QWindowsWindowFunctions::setWindowActivationBehavior(QWindowsWindowFunctions::AlwaysActivateWindow);
 #endif
-    connect(showAction, SIGNAL(triggered(bool)), this, SLOT(show()));
-    connect(hideAction, SIGNAL(triggered(bool)), this, SLOT(hide()));
-    connect(exitAction, SIGNAL(triggered(bool)), this, SLOT(closeProgram()));
-    connect(ui->actionE_xit, SIGNAL(triggered(bool)), this, SLOT(closeProgram()));
-    connect(ui->actionSettings, SIGNAL(triggered(bool)), dlgSettings, SLOT(show()));
-    connect(ui->actionUpdate_Songbook, SIGNAL(triggered(bool)), dlgUpdate, SLOT(show()));
-    connect(ui->actionAbout, SIGNAL(triggered()), dlgAbout, SLOT(show()));
-    connect(ui->actionDocumentation, SIGNAL(triggered()), this, SLOT(launchDocs()));
-    connect(icon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
-    connect(sbApi, SIGNAL(venuesChanged(OkjsVenues)), this, SLOT(venuesChanged(OkjsVenues)));
-    connect(sbApi, SIGNAL(requestsChanged(OkjsRequests)), this, SLOT(requestsChanged(OkjsRequests)));
-    connect(sbApi, SIGNAL(synchronized(QTime)), this, SLOT(synchronized(QTime)));
-    connect(blinkTimer, SIGNAL(timeout()), this, SLOT(blinkTimerTimeout()));
-    connect(sbApi, SIGNAL(alertReceived(QString, QString)), this, SLOT(showAlert(QString, QString)));
-    connect(sbApi, SIGNAL(newVersionAvailable(QString, QString, QString, QString, QString)), this, SLOT(newVersionAvailable(QString, QString, QString, QString, QString)));
-    oneShot = new QTimer(this);
-    oneShot->setSingleShot(true);
-    connect(oneShot, SIGNAL(timeout()), this, SLOT(autoSizeCols()));
-    oneShot->start(250);
+    connect(&m_showAction, &QAction::triggered, this, &SongbookClient::show);
+    connect(&m_hideAction, &QAction::triggered, this, &SongbookClient::hide);
+    connect(&m_exitAction, &QAction::triggered, this, &SongbookClient::closeProgram);
+    connect(ui->actionE_xit, &QAction::triggered, this, &SongbookClient::closeProgram);
+    connect(ui->actionSettings, &QAction::triggered, m_dlgSettings, &DialogSettings::show);
+    connect(ui->actionUpdate_Songbook, &QAction::triggered, m_dlgUpdate, &DialogUpdate::show);
+    connect(ui->actionAbout, &QAction::triggered, m_dlgAbout, &DialogAbout::show);
+    connect(ui->actionDocumentation, &QAction::triggered, this, &SongbookClient::launchDocs);
+    connect(ui->btnHide, &QPushButton::clicked, this, &SongbookClient::hide);
+    connect(ui->btnClear, &QPushButton::clicked, &m_sbApi, &OKJSongbookAPI::clearRequests);
+    connect(ui->btnRefresh, &QPushButton::clicked, &m_sbApi, &OKJSongbookAPI::refreshRequests);
+    connect(ui->tableView, &QTableView::clicked, this, &SongbookClient::requestClicked);
+    connect(ui->cbxVenue, qOverload<int>(&QComboBox::currentIndexChanged), this, &SongbookClient::venueIndexChanged);
+    connect(ui->checkBoxAccepting, &QCheckBox::clicked, &m_sbApi, &OKJSongbookAPI::setAccepting);
+    connect(&m_icon, &QSystemTrayIcon::activated, this, &SongbookClient::iconActivated);
+    connect(&m_sbApi, &OKJSongbookAPI::venuesChanged, this, &SongbookClient::venuesChanged);
+    connect(&m_sbApi, &OKJSongbookAPI::synchronized, this, &SongbookClient::synchronized);
+    connect(&m_sbApi, &OKJSongbookAPI::alertReceived, this, &SongbookClient::showAlert);
+    connect(&m_sbApi, &OKJSongbookAPI::newVersionAvailable, this, &SongbookClient::newVersionAvailable);
+    connect(&m_sbApi, &OKJSongbookAPI::newRequestsReceived, this, &SongbookClient::newRequestsReceived);
+    connect(&m_blinkTimer, &QTimer::timeout, this, &SongbookClient::blinkTimerTimeout);
+    connect(m_dlgSettings, &DialogSettings::fontChanged, &m_reqDelegate, &ItemDelegateRequests::resizeIconsForFont);
+    connect(m_dlgSettings, &DialogSettings::fontChanged, &m_reqModel, &RequestsTableModel::fontChanged);
 
+    QApplication::processEvents();
+    QTimer::singleShot(250, [&] () {
+        // We delay some stuff to give the UI time to draw and be displayed
+        QApplication::setFont(m_settings.font());
+        m_settings.restoreWindowState(m_dlgAbout);
+        m_settings.restoreWindowState(m_dlgSettings);
+        m_settings.restoreWindowState(m_dlgUpdate);
+        m_settings.restoreWindowState(this);
+        if (!m_settings.restoreColumnWidths(ui->tableView))
+            autoSizeCols();
+        connect(ui->tableView->horizontalHeader(), &QHeaderView::geometriesChanged, [&] () {
+            m_settings.saveColumnWidths(ui->tableView);
+        });
+    });
 }
 
 SongbookClient::~SongbookClient()
 {
+    m_settings.saveWindowState(m_dlgAbout);
+    m_settings.saveWindowState(m_dlgSettings);
+    m_settings.saveWindowState(m_dlgUpdate);
+    m_settings.saveWindowState(this);
+    m_dlgAbout->deleteLater();
+    m_dlgSettings->deleteLater();
+    m_dlgUpdate->deleteLater();
     delete ui;
 }
 
@@ -75,40 +93,15 @@ void SongbookClient::iconActivated(QSystemTrayIcon::ActivationReason reason)
 #endif
 }
 
-void SongbookClient::on_btnHide_clicked()
-{
-    this->hide();
-}
-
 void SongbookClient::closeProgram()
 {
-    icon->hide();
+    m_icon.hide();
     this->close();
 }
 
-void SongbookClient::on_btnRefresh_clicked()
+void SongbookClient::venuesChanged(const OkjsVenues& venues)
 {
-    sbApi->refreshRequests();
-}
-
-void SongbookClient::requestsChanged(OkjsRequests requests)
-{
-    static int lastCount = 0;
-    if (lastCount == 0)
-    {
-        oneShot->start(150);
-    }
-    if (settings.popup()) {
-        show();
-        raise();
-        activateWindow();
-    }
-    lastCount = requests.size();
-}
-
-void SongbookClient::venuesChanged(OkjsVenues venues)
-{
-    int venue = settings.lastVenue();
+    int venue = m_settings.lastVenue();
     ui->cbxVenue->clear();
     int selItem = 0;
     for (int i=0; i < venues.size(); i++)
@@ -120,34 +113,29 @@ void SongbookClient::venuesChanged(OkjsVenues venues)
         }
     }
     ui->cbxVenue->setCurrentIndex(selItem);
-    settings.setLastVenue(ui->cbxVenue->itemData(selItem).toInt());
-    ui->checkBoxAccepting->setChecked(sbApi->getAccepting());
+    m_settings.setLastVenue(ui->cbxVenue->itemData(selItem).toInt());
+    ui->checkBoxAccepting->setChecked(m_sbApi.getAccepting());
 }
 
 void SongbookClient::autoSizeCols()
 {
-    int fH = QFontMetrics(settings.font()).height();
-    int tsColSize = QFontMetrics(settings.font()).width(" 00/00/00 00:00 pm ");
-    int keySize = QFontMetrics(settings.font()).width("_Key_");
-    int iconWidth = fH + fH;
-    int remainingSpace = ui->tableView->width() - tsColSize - keySize - (iconWidth * 3);
-    int singerColSize = (remainingSpace / 3) - 120;
-    int artistColSize = (remainingSpace / 3);
-    int titleColSize = (remainingSpace / 3) + 115;
-    ui->tableView->horizontalHeader()->resizeSection(0, singerColSize);
-    ui->tableView->horizontalHeader()->resizeSection(1, artistColSize);
-    ui->tableView->horizontalHeader()->resizeSection(2, titleColSize);
-    ui->tableView->horizontalHeader()->resizeSection(3, iconWidth);
-    ui->tableView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
-    ui->tableView->horizontalHeader()->resizeSection(4, iconWidth);
-    ui->tableView->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Fixed);
-
-    ui->tableView->horizontalHeader()->resizeSection(5, tsColSize);
-    ui->tableView->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Fixed);
-    ui->tableView->horizontalHeader()->resizeSection(6, keySize);
-    ui->tableView->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Fixed);
-    ui->tableView->horizontalHeader()->resizeSection(7, iconWidth);
-    ui->tableView->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Fixed);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::SINGER, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::KEY, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::TIMESTAMP, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::COPY, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::DELETE, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::SEARCH, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::ARTIST, QHeaderView::Stretch);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::TITLE, QHeaderView::Stretch);
+    QApplication::processEvents();
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::SINGER, QHeaderView::Interactive);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::KEY, QHeaderView::Interactive);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::TIMESTAMP, QHeaderView::Interactive);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::COPY, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::DELETE, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::SEARCH, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::ARTIST, QHeaderView::Interactive);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(RequestsTableModel::TITLE, QHeaderView::Interactive);
 }
 
 void SongbookClient::synchronized(QTime updateTime)
@@ -159,7 +147,7 @@ void SongbookClient::synchronized(QTime updateTime)
 void SongbookClient::closeEvent(QCloseEvent *event)
 {
 #ifndef Q_OS_MACX
-    if (icon->isVisible()) {
+    if (m_icon.isVisible()) {
         hide();
         event->ignore();
     }
@@ -174,66 +162,51 @@ void SongbookClient::resizeEvent(QResizeEvent *event)
 {
     autoSizeCols();
     QMainWindow::resizeEvent(event);
+    m_settings.saveWindowState(this);
 }
 
-void SongbookClient::on_tableView_clicked(const QModelIndex &index)
+void SongbookClient::requestClicked(const QModelIndex &index)
 {
     if (index.column() == RequestsTableModel::DELETE)
     {
-        sbApi->removeRequest(index.data(Qt::UserRole).toInt());
+        m_sbApi.removeRequest(index.data(Qt::UserRole).toInt());
     }
     if (index.column() == RequestsTableModel::COPY)
     {
         QClipboard *clipboard = QGuiApplication::clipboard();
-        clipboard->setText(reqModel->requests().at(index.row()).artist() + " " + reqModel->requests().at(index.row()).title());
+        clipboard->setText(m_reqModel.requests().at(index.row()).artist() + " " + m_reqModel.requests().at(index.row()).title());
     }
     if (index.column() == RequestsTableModel::SEARCH)
     {
-        QDesktopServices::openUrl(QUrl("http://db.openkj.org/?type=All&searchstr=" + QUrl::toPercentEncoding(reqModel->requests().at(index.row()).artist() + " " + reqModel->requests().at(index.row()).title())));
+        QDesktopServices::openUrl(QUrl("https://db.openkj.org/?type=All&searchstr=" + QUrl::toPercentEncoding(m_reqModel.requests().at(index.row()).artist() + " " + m_reqModel.requests().at(index.row()).title())));
     }
 }
 
-void SongbookClient::on_btnClear_clicked()
-{
-    sbApi->clearRequests();
-}
-
-void SongbookClient::on_cbxVenue_currentIndexChanged(int index)
+void SongbookClient::venueIndexChanged(int index)
 {
     int venue = ui->cbxVenue->itemData(index).toInt();
-    settings.setLastVenue(venue);
-    sbApi->refreshRequests();
-    ui->checkBoxAccepting->setChecked(sbApi->getAccepting());
+    m_settings.setLastVenue(venue);
+    m_sbApi.refreshRequests();
+    ui->checkBoxAccepting->setChecked(m_sbApi.getAccepting());
     qWarning() << "Set venue_id to " << venue;
-    qWarning() << "Settings now reporting venue as " << settings.lastVenue();
-}
-
-void SongbookClient::on_checkBoxAccepting_clicked(bool checked)
-{
-    sbApi->setAccepting(checked);
+    qWarning() << "Settings now reporting venue as " << m_settings.lastVenue();
 }
 
 void SongbookClient::blinkTimerTimeout()
 {
-    static bool blinked = false;
-    if ((sbApi->numRequests() > 0) && !blinked)
+    if ((m_sbApi.numRequests() > 0) && !m_blinked)
     {
-        icon->setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent-blink.svg")));
-        blinked = true;
+        m_icon.setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent-blink.svg")));
+        m_blinked = true;
     }
-    else if ((sbApi->numRequests() > 0) && blinked)
+    else if (m_blinked)
     {
-        icon->setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent.svg")));
-        blinked = false;
-    }
-    else if ((sbApi->numRequests() == 0) && blinked)
-    {
-        icon->setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent.svg")));
-        blinked = false;
+        m_icon.setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent.svg")));
+        m_blinked = false;
     }
 }
 
-void SongbookClient::showAlert(QString title, QString message)
+void SongbookClient::showAlert(const QString& title, const QString& message)
 {
     show();
     QMessageBox msgBox;
@@ -248,9 +221,17 @@ void SongbookClient::launchDocs()
     QDesktopServices::openUrl(QUrl("https://docs.okjsongbook.com"));
 }
 
-void SongbookClient::newVersionAvailable(QString curVersion, QString availVersion, QString branch, QString os, QString url)
+void SongbookClient::newVersionAvailable(const QString &curVersion, const QString &availVersion, const QString &branch, const QString &os, const QString &url)
 {
     DialogUpdater dlgUpdater(curVersion,availVersion,branch,os,url,this);
     dlgUpdater.exec();
 
+}
+
+void SongbookClient::newRequestsReceived() {
+    if (m_settings.popup()) {
+        show();
+        raise();
+        activateWindow();
+    }
 }

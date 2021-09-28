@@ -12,11 +12,11 @@
 class OkjsSong
 {
 public:
-    OkjsSong() {}
-    OkjsSong(QString Artist, QString Title, int Key = 0) { artist = Artist; title = Title; key=Key; }
+    OkjsSong() = default;
+    OkjsSong(const QString &Artist, const QString &Title, int Key = 0) { artist = Artist; title = Title; key=Key; }
     QString artist;
     QString title;
-    int key;
+    int key{0};
 };
 
 inline bool operator==(const OkjsSong &s1, const OkjsSong &s2)
@@ -75,22 +75,20 @@ private:
     QUrl serverUrl;
     Settings settings;
     int entitledSystems;
+    bool containsNewRequests(const OkjsRequests &previous, const OkjsRequests &current);
 
 public:
-    explicit OKJSongbookAPI(QObject *parent = 0);
+    explicit OKJSongbookAPI(QObject *parent = nullptr);
     void getSerial();
-    void refreshRequests();
     void removeRequest(int requestId);
     bool getAccepting();
-    void setAccepting(bool enabled);
     void refreshVenues(bool blocking = false);
-    void clearRequests();
     void updateSongDb(const OkjsSongs& songs);
     int numRequests();
     void alertCheck();
     void versionCheck();
     void getEntitledSystemCount();
-    int entitledSystemCount() { return entitledSystems; }
+    [[nodiscard]] int entitledSystemCount() const { return entitledSystems; }
 
 
 signals:
@@ -106,10 +104,14 @@ signals:
     void alertReceived(QString title, QString message);
     void newVersionAvailable(QString curVersion, QString availVersion, QString branch, QString os, QString url);
     void entitledSystemCountChanged(int count);
+    void newRequestsReceived();
 
 
 public slots:
     bool testApiKey(const QString& key);
+    void refreshRequests();
+    void clearRequests();
+    void setAccepting(bool enabled);
 
 private slots:
         void onSslErrors(QNetworkReply * reply, const QList<QSslError>& errors);

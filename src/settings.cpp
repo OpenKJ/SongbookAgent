@@ -1,5 +1,6 @@
 #include "settings.h"
 #include <QApplication>
+#include <QHeaderView>
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
@@ -98,4 +99,61 @@ void Settings::saveCsvImporterConfig(importerConfig config)
 void Settings::setSystemId(int id)
 {
     return settings->setValue("systemId", id);
+}
+
+void Settings::saveWindowState(QWidget *window)
+{
+    if (!window->isVisible())
+        return;
+    settings->beginGroup(window->objectName());
+    settings->setValue("geometry", window->saveGeometry());
+    settings->endGroup();
+}
+
+void Settings::restoreWindowState(QWidget *window)
+{
+    settings->beginGroup(window->objectName());
+    if (settings->contains("geometry"))
+    {
+        window->restoreGeometry(settings->value("geometry").toByteArray());
+    }
+    else if (settings->contains("size") && settings->contains("pos"))
+    {
+        window->resize(settings->value("size", QSize(640, 480)).toSize());
+        window->move(settings->value("pos", QPoint(100, 100)).toPoint());
+    }
+    settings->endGroup();
+}
+
+void Settings::saveColumnWidths(QTableView *tableView)
+{
+    settings->beginGroup(tableView->objectName());
+    for (int i=0; i < tableView->horizontalHeader()->count(); i++)
+    {
+        settings->beginGroup(QString::number(i));
+        settings->setValue("size", tableView->horizontalHeader()->sectionSize(i));
+        settings->setValue("hidden", tableView->horizontalHeader()->isSectionHidden(i));
+        settings->endGroup();
+    }
+    settings->endGroup();
+}
+
+bool Settings::restoreColumnWidths(QTableView *tableView)
+{
+    if (!settings->childGroups().contains(tableView->objectName()))
+        return false;
+    settings->beginGroup(tableView->objectName());
+    QStringList headers = settings->childGroups();
+    for (int i=0; i < headers.size(); i++)
+    {
+        settings->beginGroup(headers.at(i));
+        int section = headers.at(i).toInt();
+        bool hidden = settings->value("hidden", false).toBool();
+        int size = settings->value("size", 0).toInt();
+        tableView->horizontalHeader()->resizeSection(section, size);
+        tableView->horizontalHeader()->setSectionHidden(section, hidden);
+        settings->endGroup();
+    }
+    settings->endGroup();
+    return true;
 }

@@ -58,6 +58,7 @@ void DialogSettings::on_buttonBox_accepted()
     settings.setApiKey(ui->lineEditApiKey->text());
     settings.setPopup(ui->checkBoxPopup->isChecked());
     settings.setFont(font);
+    emit fontChanged(font);
     hide();
 }
 

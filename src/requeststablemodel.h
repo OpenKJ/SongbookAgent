@@ -22,6 +22,8 @@
 #define REQUESTSTABLEMODEL_H
 
 #include <QAbstractTableModel>
+#include <QItemDelegate>
+#include <QImage>
 #include "okjsongbookapi.h"
 #include "settings.h"
 
@@ -54,6 +56,25 @@ public:
     void setKey(int key);
 };
 
+class ItemDelegateRequests : public QItemDelegate
+{
+Q_OBJECT
+private:
+    QImage m_iconDelete;
+    QImage m_iconWebSearch;
+    QImage m_iconCopy;
+    int m_curFontHeight{0};
+    Settings m_settings;
+
+public:
+    [[maybe_unused]] explicit ItemDelegateRequests(QObject *parent = nullptr);
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+public slots:
+    void resizeIconsForFont(const QFont &font);
+
+};
+
 class RequestsTableModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -61,11 +82,13 @@ class RequestsTableModel : public QAbstractTableModel
 private:
     QList<Request> m_requests;
     OKJSongbookAPI *songbookApi;
-    Settings settings;
-
+    Settings m_settings;
+    QFont m_curFont{m_settings.font()};
+    QFontMetrics m_curFontMetrics{m_curFont};
+    int m_curFontHeight{m_curFontMetrics.height()};
 
 public:
-    explicit RequestsTableModel(OKJSongbookAPI *sbApi, QObject *parent = 0);
+    explicit RequestsTableModel(OKJSongbookAPI *sbApi, QObject *parent = nullptr);
     enum {SINGER=0,ARTIST,TITLE,COPY,SEARCH,TIMESTAMP,KEY,DELETE};
     int count();
     int rowCount(const QModelIndex &parent) const;
@@ -74,6 +97,9 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
     QList<Request> requests() {return m_requests;}
+
+public slots:
+    void fontChanged(const QFont &font);
 
 private slots:
     void requestsChanged(OkjsRequests requests);
