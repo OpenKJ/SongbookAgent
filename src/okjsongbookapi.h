@@ -39,7 +39,7 @@ public:
     QString title;
     int key;
     int time;
-    bool operator == (const OkjsRequest r) const;
+    bool operator == (const OkjsRequest& r) const;
 };
 
 
@@ -85,7 +85,7 @@ public:
     void setAccepting(bool enabled);
     void refreshVenues(bool blocking = false);
     void clearRequests();
-    void updateSongDb(OkjsSongs songs);
+    void updateSongDb(const OkjsSongs& songs);
     int numRequests();
     void alertCheck();
     void versionCheck();
@@ -109,10 +109,10 @@ signals:
 
 
 public slots:
-    bool testApiKey(QString key);
+    bool testApiKey(const QString& key);
 
 private slots:
-        void onSslErrors(QNetworkReply * reply, QList<QSslError> errors);
+        void onSslErrors(QNetworkReply * reply, const QList<QSslError>& errors);
         void onNetworkReply(QNetworkReply* reply);
         void timerTimeout();
         void alertTimerTimeout();

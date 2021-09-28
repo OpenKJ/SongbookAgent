@@ -8,8 +8,6 @@ DialogAbout::DialogAbout(QWidget *parent) :
 {
     ui->setupUi(this);
     QString version = QString(VERSION_STRING);
-    QString bldDate = QString(BUILD_DATE);
-    ui->labelBuildDate->setText("Build date: " + bldDate);
     ui->labelVersion->setText("Version: " + version);
 }
 

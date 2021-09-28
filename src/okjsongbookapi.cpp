@@ -82,10 +82,10 @@ void OKJSongbookAPI::removeRequest(int requestId)
 
 bool OKJSongbookAPI::getAccepting()
 {
-    for (int i=0; i<venues.size(); i++)
+    for (const auto & venue : venues)
     {
-        if (venues.at(i).venueId == settings.lastVenue())
-            return venues.at(i).accepting;
+        if (venue.venueId == settings.lastVenue())
+            return venue.accepting;
     }
     return false;
 }
@@ -136,7 +136,7 @@ void OKJSongbookAPI::clearRequests()
     manager->post(request, jsonDocument.toJson());
 }
 
-void OKJSongbookAPI::updateSongDb(OkjsSongs songs)
+void OKJSongbookAPI::updateSongDb(const OkjsSongs& songs)
 {
     QList<OkjsSong> songList = songs.toList();
     emit remoteSongDbUpdateStart();
@@ -215,7 +215,7 @@ int OKJSongbookAPI::numRequests()
     return requests.size();
 }
 
-bool OKJSongbookAPI::testApiKey(QString key)
+bool OKJSongbookAPI::testApiKey(const QString& key)
 {
     QJsonObject mainObject;
     mainObject.insert("api_key", key);
@@ -265,7 +265,7 @@ bool OKJSongbookAPI::testApiKey(QString key)
     return false;
 }
 
-void OKJSongbookAPI::onSslErrors(QNetworkReply *reply, QList<QSslError> errors)
+void OKJSongbookAPI::onSslErrors(QNetworkReply *reply, const QList<QSslError>& errors)
 {
     Q_UNUSED(errors)
     static QUrl lastUrl;
@@ -417,10 +417,10 @@ void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
     {
         QJsonArray venuesArray = json.object().value("venues").toArray();
         OkjsVenues l_venues;
-        for (int i=0; i < venuesArray.size(); i++)
+        for (auto && i : venuesArray)
         {
             OkjsVenue venue;
-            QJsonObject jsonObject = venuesArray.at(i).toObject();
+            QJsonObject jsonObject = i.toObject();
             venue.venueId = jsonObject.value("venue_id").toInt();
             venue.name = jsonObject.value("name").toString();
             venue.urlName = jsonObject.value("url_name").toString();
@@ -445,10 +445,10 @@ void OKJSongbookAPI::onNetworkReply(QNetworkReply *reply)
     {
         QJsonArray requestsArray = json.object().value("requests").toArray();
         OkjsRequests l_requests;
-        for (int i=0; i < requestsArray.size(); i++)
+        for (auto && i : requestsArray)
         {
             OkjsRequest request;
-            QJsonObject jsonObject = requestsArray.at(i).toObject();
+            QJsonObject jsonObject = i.toObject();
             request.requestId = jsonObject.value("request_id").toInt();
             request.artist = jsonObject.value("artist").toString();
             request.title = jsonObject.value("title").toString();
@@ -521,7 +521,7 @@ bool OkjsVenue::operator ==(const OkjsVenue &v) const
     return true;
 }
 
-bool OkjsRequest::operator ==(const OkjsRequest r) const
+bool OkjsRequest::operator ==(const OkjsRequest& r) const
 {
     if (r.requestId != requestId)
         return false;

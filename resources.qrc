@@ -6,5 +6,8 @@
         <file>resources/AppIcon-blink.png</file>
         <file>resources/edit-copy-symbolic.symbolic.png</file>
         <file>resources/web-arrow-icon.png</file>
+        <file>resources/org.openkj.SongbookAgent-blink.svg</file>
+        <file>resources/org.openkj.SongbookAgent.ico</file>
+        <file>resources/org.openkj.SongbookAgent.svg</file>
     </qresource>
 </RCC>

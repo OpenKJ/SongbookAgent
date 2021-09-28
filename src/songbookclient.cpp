@@ -16,7 +16,7 @@ SongbookClient::SongbookClient(QWidget *parent) :
     sbApi = new OKJSongbookAPI(this);
     sbApi->versionCheck();
     icon = new QSystemTrayIcon(this);
-    icon->setIcon(QIcon(QPixmap(":/resources/AppIcon.png")));
+    icon->setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent.svg")));
     icon->show();
     dlgSettings = new DialogSettings(sbApi,this);
     dlgUpdate = new DialogUpdate(sbApi, this);
@@ -34,6 +34,9 @@ SongbookClient::SongbookClient(QWidget *parent) :
     iconMenu->addAction(exitAction);
 #ifndef Q_OS_MACX
     icon->setContextMenu(iconMenu);
+#endif
+#ifdef Q_OS_WIN
+    QWindowsWindowFunctions::setWindowActivationBehavior(QWindowsWindowFunctions::AlwaysActivateWindow);
 #endif
     connect(showAction, SIGNAL(triggered(bool)), this, SLOT(show()));
     connect(hideAction, SIGNAL(triggered(bool)), this, SLOT(hide()));
@@ -95,8 +98,11 @@ void SongbookClient::requestsChanged(OkjsRequests requests)
     {
         oneShot->start(150);
     }
-    if (settings.popup())
+    if (settings.popup()) {
         show();
+        raise();
+        activateWindow();
+    }
     lastCount = requests.size();
 }
 
@@ -212,17 +218,17 @@ void SongbookClient::blinkTimerTimeout()
     static bool blinked = false;
     if ((sbApi->numRequests() > 0) && !blinked)
     {
-        icon->setIcon(QIcon(QPixmap(":/resources/AppIcon-blink.png")));
+        icon->setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent-blink.svg")));
         blinked = true;
     }
     else if ((sbApi->numRequests() > 0) && blinked)
     {
-        icon->setIcon(QIcon(QPixmap(":/resources/AppIcon.png")));
+        icon->setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent.svg")));
         blinked = false;
     }
     else if ((sbApi->numRequests() == 0) && blinked)
     {
-        icon->setIcon(QIcon(QPixmap(":/resources/AppIcon.png")));
+        icon->setIcon(QIcon(QPixmap(":/resources/org.openkj.SongbookAgent.svg")));
         blinked = false;
     }
 }
