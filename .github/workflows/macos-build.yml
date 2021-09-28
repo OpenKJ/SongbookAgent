@@ -88,7 +88,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         mkdir -p fakeroot/Applications
-        mv "SongbookAgent.app" fakeroot/Applications/SongbookAgent.app
+        mv "SongbookAgent.app" "fakeroot/Applications/Songbook Agent.app"
         pkgbuild --root "fakeroot" --component-plist ../macos/components.plist --identifier "com.okjsongbook.sbagent" --sign "Developer ID Installer: Isaac Lightburn (47W8CPBS5A)" ${{ env.installer_fn }}
 
 #  Disabled notarization because gstreamer doesn't ship hardened runtimes so it's pointelss to try as long as we're bundling gstreamer
