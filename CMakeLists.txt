@@ -113,13 +113,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBS
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(openkj_ICON ${CMAKE_CURRENT_SOURCE_DIR}/src/Icons/OpenKJ.icns)
+  #  set(openkj_ICON ${CMAKE_CURRENT_SOURCE_DIR}/src/Icons/OpenKJ.icns)
     set_source_files_properties(${openkj_ICON} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources"
             )
     add_executable(SongbookAgent
             MACOSX_BUNDLE
-            ${openkj_ICON}
+           # ${openkj_ICON}
             ${SOURCE_FILES}
             )
     set_target_properties(SongbookAgent PROPERTIES
@@ -155,7 +155,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                     )
                 else ()
                     add_custom_command(
-                            TARGET SongookAgent
+                            TARGET SongbookAgent
                             COMMAND "${MACDEPLOYQT}"
                             ARGS "${CMAKE_BINARY_DIR}/SongbookAgent.app"
                     )
