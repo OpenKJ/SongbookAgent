@@ -54,6 +54,7 @@ jobs:
       run: |
         sed -i "s/#define MyAppVersion.*/#define MyAppVersion \"${{ steps.get_version.outputs.version-without-v }}\"/" windows/openkj-songbook-agent_x86.iss
         sed -i "s/#define MyAppVersion.*/#define MyAppVersion \"${{ steps.get_version.outputs.version-without-v }}\"/" windows/openkj-songbook-agent_x86_64.iss
+        sed -i "s/#define MyAppVersion.*/#define MyAppVersion \"${{ steps.get_version.outputs.version-without-v }}\"/" cd/openkj${{ matrix.bits }}.iss
 
     - name: Update version.h
       run: |
@@ -78,17 +79,9 @@ jobs:
         file-name: openssl.zip
         location: /cached-downloads
 
-    - name: Cache Qt
-      id: cache-qt
-      uses: actions/cache@v2
-      with:
-       path: "D:/a/OpenKJ/Qt"
-       key: ${{ runner.os }}-QtCache-5.15.2-${{ matrix.arch }}-2
-
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-       cached: ${{ steps.cache-qt.outputs.cache-hit }}
        version: '5.15.2'
        arch: ${{ matrix.qtarch }}
        modules: 'core gui sql network widgets concurrent svg printsupport'
