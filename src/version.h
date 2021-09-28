@@ -3,7 +3,7 @@
 
 #define VERSION_MAJOR 1
 #define VERSION_MINOR 1
-#define VERSION_BUILD 35
-#define VERSION_STRING "1.1.35"
+#define VERSION_BUILD 36
+#define VERSION_STRING "1.1.36"
 
 #endif //VERSION_H
