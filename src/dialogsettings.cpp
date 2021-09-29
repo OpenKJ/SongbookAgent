@@ -16,7 +16,7 @@ DialogSettings::DialogSettings(OKJSongbookAPI &sbApi, QWidget *parent) :
     m_sbApi.getEntitledSystemCount();
 #ifdef Q_OS_MACX
     // Disable/hide this setting since it doesn't work on Mac anyway
-    ui->checkBoxPopup->hide();
+    m_ui->checkBoxPopup->hide();
 #endif
 }
 
