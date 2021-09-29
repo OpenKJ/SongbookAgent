@@ -46,7 +46,7 @@ jobs:
         BLDDATE=$(date +'%Y-%m-%d')
         echo "rtype=${RTYPE}" >> $GITHUB_ENV
         echo "ver=${VER}" >> $GITHUB_ENV
-        echo "installer_fn=OpenKJ-Songbook-Agent-setup-Windows-${{ matrix.bits }}bit.exe" >> $GITHUB_ENV
+        echo "installer_fn=OpenKJ-Songbook-Agent-v${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}.${{ steps.get_version.outputs.patch }}-setup-Windows-${{ matrix.bits }}bit.exe" >> $GITHUB_ENV
         echo "OpenKJ Songbook Agent Version: $VER"
       shell: bash
 
