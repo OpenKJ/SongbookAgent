@@ -14,7 +14,7 @@ class DialogUpdater : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogUpdater(QString curVersion, QString availVersion, QString branch, QString os, QString url, QWidget *parent = nullptr);
+    explicit DialogUpdater(const QString& curVersion, const QString& availVersion, const QString& branch, const QString& os, const QString &url, QWidget *parent = nullptr);
     ~DialogUpdater();
 
 private slots:

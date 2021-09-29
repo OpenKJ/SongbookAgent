@@ -11,6 +11,7 @@
 #include "dialogupdate.h"
 #include "dialogabout.h"
 #include <QMenu>
+#include <memory>
 
 namespace Ui {
 class SongbookClient;
@@ -25,13 +26,10 @@ public:
     ~SongbookClient() override;
 
 private:
-    Ui::SongbookClient *ui;
+    std::unique_ptr<Ui::SongbookClient> ui;
     QSystemTrayIcon m_icon{QIcon(QPixmap(":/resources/org.openkj.SongbookAgent.svg"))};
     OKJSongbookAPI m_sbApi{this};
-    DialogSettings *m_dlgSettings;
-    DialogUpdate *m_dlgUpdate;
-    DialogAbout *m_dlgAbout;
-    RequestsTableModel m_reqModel{&m_sbApi, this};
+    RequestsTableModel m_reqModel{m_sbApi, this};
     ItemDelegateRequests m_reqDelegate{this};
     Settings m_settings;
     QTimer m_blinkTimer;

@@ -10,7 +10,7 @@
 #include <QProcess>
 #include <QStandardPaths>
 
-DialogUpdater::DialogUpdater(QString curVersion, QString availVersion, QString branch, QString os, QString url, QWidget *parent) :
+DialogUpdater::DialogUpdater(const QString& curVersion, const QString& availVersion, const QString& branch, const QString& os, const QString &url, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogUpdater)
 {

@@ -2,6 +2,7 @@
 #define DIALOGABOUT_H
 
 #include <QDialog>
+#include <memory>
 
 namespace Ui {
 class DialogAbout;
@@ -13,10 +14,11 @@ class DialogAbout : public QDialog
 
 public:
     explicit DialogAbout(QWidget *parent = nullptr);
-    ~DialogAbout();
+    ~DialogAbout() override;
 
 private:
-    Ui::DialogAbout *ui;
+    std::unique_ptr<Ui::DialogAbout> m_ui;
+
 };
 
 #endif // DIALOGABOUT_H

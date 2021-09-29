@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 Thomas Isaac Lightburn
+ * Copyright (c) 2013-2021 Thomas Isaac Lightburn
  *
  *
  * This file is part of OpenKJ.
@@ -41,18 +41,17 @@ private:
 
 public:
     Request(int RequestId, QString Singer, QString Artist, QString Title, int ts, int key);
-    int requestId() const;
+    [[nodiscard]] int requestId() const;
     void setRequestId(int requestId);
-    int timeStamp() const;
+    [[nodiscard]] int timeStamp() const;
     void setTimeStamp(int timeStamp);
-    QString artist() const;
+    [[nodiscard]] QString artist() const;
     void setArtist(const QString &artist);
-    QString title() const;
+    [[nodiscard]] QString title() const;
     void setTitle(const QString &title);
-    QString singer() const;
+    [[nodiscard]] QString singer() const;
     void setSinger(const QString &singer);
-
-    int key() const;
+    [[nodiscard]] int key() const;
     void setKey(int key);
 };
 
@@ -81,31 +80,32 @@ class RequestsTableModel : public QAbstractTableModel
 
 private:
     QList<Request> m_requests;
-    OKJSongbookAPI *songbookApi;
+    OKJSongbookAPI &songbookApi;
     Settings m_settings;
     QFont m_curFont{m_settings.font()};
     QFontMetrics m_curFontMetrics{m_curFont};
     int m_curFontHeight{m_curFontMetrics.height()};
 
 public:
-    explicit RequestsTableModel(OKJSongbookAPI *sbApi, QObject *parent = nullptr);
+    explicit RequestsTableModel(OKJSongbookAPI &sbApi, QObject *parent = nullptr);
     enum {SINGER=0,ARTIST,TITLE,COPY,SEARCH,TIMESTAMP,KEY,DELETE};
-    int count();
-    int rowCount(const QModelIndex &parent) const;
-    int columnCount(const QModelIndex &parent) const;
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    QList<Request> requests() {return m_requests;}
+    [[nodiscard]] int count();
+    [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
+    [[nodiscard]] int columnCount(const QModelIndex &parent) const override;
+    [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    [[nodiscard]] Qt::ItemFlags flags(const QModelIndex &index) const override;
+    [[nodiscard]] QList<Request> requests() {return m_requests;}
 
 public slots:
     void fontChanged(const QFont &font);
 
 private slots:
-    void requestsChanged(OkjsRequests requests);
+    void requestsChanged(const OkjsRequests& requests);
 
 signals:
     void alertReceived(QString title, QString message);
+    
 };
 
 #endif // REQUESTSTABLEMODEL_H

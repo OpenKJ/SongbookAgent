@@ -3,15 +3,11 @@
 #include "version.h"
 
 DialogAbout::DialogAbout(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::DialogAbout)
-{
-    ui->setupUi(this);
-    QString version = QString(VERSION_STRING);
-    ui->labelVersion->setText("Version: " + version);
+        QDialog(parent),
+        m_ui(new Ui::DialogAbout) {
+    m_ui->setupUi(this);
+    m_ui->labelVersion->setText("Version: " + QString(VERSION_STRING));
 }
 
-DialogAbout::~DialogAbout()
-{
-    delete ui;
-}
+DialogAbout::~DialogAbout() = default;
+

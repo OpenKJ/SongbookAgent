@@ -20,9 +20,6 @@ SongbookClient::SongbookClient(QWidget *parent) :
     ui->btnRefresh->setIcon(QIcon(QPixmap(":/resources/refresh.svg")));
     m_sbApi.versionCheck();
     m_icon.show();
-    m_dlgSettings = new DialogSettings(&m_sbApi, this);
-    m_dlgUpdate = new DialogUpdate(&m_sbApi, this);
-    m_dlgAbout = new DialogAbout(this);
     ui->tableView->setItemDelegate(&m_reqDelegate);
     ui->tableView->setModel(&m_reqModel);
     m_blinkTimer.start(500);
@@ -39,9 +36,26 @@ SongbookClient::SongbookClient(QWidget *parent) :
     connect(&m_hideAction, &QAction::triggered, this, &SongbookClient::hide);
     connect(&m_exitAction, &QAction::triggered, this, &SongbookClient::closeProgram);
     connect(ui->actionE_xit, &QAction::triggered, this, &SongbookClient::closeProgram);
-    connect(ui->actionSettings, &QAction::triggered, m_dlgSettings, &DialogSettings::show);
-    connect(ui->actionUpdate_Songbook, &QAction::triggered, m_dlgUpdate, &DialogUpdate::show);
-    connect(ui->actionAbout, &QAction::triggered, m_dlgAbout, &DialogAbout::show);
+    connect(ui->actionSettings, &QAction::triggered, [&] () {
+        auto settingsDlg = new DialogSettings(m_sbApi, this);
+        connect(settingsDlg, &DialogSettings::fontChanged, &m_reqDelegate, &ItemDelegateRequests::resizeIconsForFont);
+        connect(settingsDlg, &DialogSettings::fontChanged, &m_reqModel, &RequestsTableModel::fontChanged);
+        settingsDlg->setModal(true);
+        settingsDlg->setAttribute(Qt::WA_DeleteOnClose, true);
+        settingsDlg->show();
+    });
+    connect(ui->actionUpdate_Songbook, &QAction::triggered, [&] () {
+        auto updateDlg = new DialogUpdate(m_sbApi, this);
+        updateDlg->setModal(true);
+        updateDlg->setAttribute(Qt::WA_DeleteOnClose, true);
+        updateDlg->show();
+    });
+    connect(ui->actionAbout, &QAction::triggered, [&] () {
+       auto aboutDlg = new DialogAbout(this);
+       aboutDlg->setAttribute(Qt::WA_DeleteOnClose, true);
+       aboutDlg->setModal(true);
+       aboutDlg->show();
+    });
     connect(ui->actionDocumentation, &QAction::triggered, this, &SongbookClient::launchDocs);
     connect(ui->btnHide, &QPushButton::clicked, this, &SongbookClient::hide);
     connect(ui->btnClear, &QPushButton::clicked, &m_sbApi, &OKJSongbookAPI::clearRequests);
@@ -56,16 +70,12 @@ SongbookClient::SongbookClient(QWidget *parent) :
     connect(&m_sbApi, &OKJSongbookAPI::newVersionAvailable, this, &SongbookClient::newVersionAvailable);
     connect(&m_sbApi, &OKJSongbookAPI::newRequestsReceived, this, &SongbookClient::newRequestsReceived);
     connect(&m_blinkTimer, &QTimer::timeout, this, &SongbookClient::blinkTimerTimeout);
-    connect(m_dlgSettings, &DialogSettings::fontChanged, &m_reqDelegate, &ItemDelegateRequests::resizeIconsForFont);
-    connect(m_dlgSettings, &DialogSettings::fontChanged, &m_reqModel, &RequestsTableModel::fontChanged);
+
 
     QApplication::processEvents();
     QTimer::singleShot(250, [&] () {
         // We delay some stuff to give the UI time to draw and be displayed
         QApplication::setFont(m_settings.font());
-        m_settings.restoreWindowState(m_dlgAbout);
-        m_settings.restoreWindowState(m_dlgSettings);
-        m_settings.restoreWindowState(m_dlgUpdate);
         m_settings.restoreWindowState(this);
         if (!m_settings.restoreColumnWidths(ui->tableView))
             autoSizeCols();
@@ -77,14 +87,7 @@ SongbookClient::SongbookClient(QWidget *parent) :
 
 SongbookClient::~SongbookClient()
 {
-    m_settings.saveWindowState(m_dlgAbout);
-    m_settings.saveWindowState(m_dlgSettings);
-    m_settings.saveWindowState(m_dlgUpdate);
     m_settings.saveWindowState(this);
-    m_dlgAbout->deleteLater();
-    m_dlgSettings->deleteLater();
-    m_dlgUpdate->deleteLater();
-    delete ui;
 }
 
 void SongbookClient::iconActivated(QSystemTrayIcon::ActivationReason reason)

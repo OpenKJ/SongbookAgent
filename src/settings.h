@@ -36,12 +36,12 @@ signals:
     void apiKeyChanged(QString);
 
 public slots:
-    void setApiKey(QString key);
+    void setApiKey(const QString& key);
     void setPopup(bool popup);
-    void setFont(QFont font);
+    void setFont(const QFont& font);
     void setLastVenue(int venueId);
-    void saveFileImporterConfig(importerConfig config);
-    void saveCsvImporterConfig(importerConfig config);
+    void saveFileImporterConfig(const importerConfig& config);
+    void saveCsvImporterConfig(const importerConfig& config);
     void setSystemId(int id);
     bool restoreColumnWidths(QTableView *tableView);
     void saveColumnWidths(QTableView *tableView);

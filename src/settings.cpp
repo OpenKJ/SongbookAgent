@@ -56,7 +56,7 @@ int Settings::systemId()
     return settings->value("systemId", 1).toInt();
 }
 
-void Settings::setApiKey(QString key)
+void Settings::setApiKey(const QString& key)
 {
     settings->setValue("apiKey", key);
     emit apiKeyChanged(key);
@@ -67,7 +67,7 @@ void Settings::setPopup(bool popup)
     settings->setValue("popup", popup);
 }
 
-void Settings::setFont(QFont font)
+void Settings::setFont(const QFont& font)
 {
     settings->setValue("font", font.toString());
     QApplication::setFont(font, "QWidget");
@@ -78,7 +78,7 @@ void Settings::setLastVenue(int venueId)
     settings->setValue("lastVenue", venueId);
 }
 
-void Settings::saveFileImporterConfig(importerConfig config)
+void Settings::saveFileImporterConfig(const importerConfig& config)
 {
     settings->setValue("fimportArtistCol", config.artistCol);
     settings->setValue("fimportTitleCol", config.titleCol);
@@ -87,7 +87,7 @@ void Settings::saveFileImporterConfig(importerConfig config)
     settings->setValue("fimportConvertUnderscore", config.convertUnderscore);
 }
 
-void Settings::saveCsvImporterConfig(importerConfig config)
+void Settings::saveCsvImporterConfig(const importerConfig& config)
 {
     settings->setValue("cimportArtistCol", config.artistCol);
     settings->setValue("cimportTitleCol", config.titleCol);

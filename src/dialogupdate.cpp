@@ -3,16 +3,15 @@
 
 #include <QFileDialog>
 #include <QStandardPaths>
-#include <QDebug>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QDirIterator>
 
-DialogUpdate::DialogUpdate(OKJSongbookAPI *sbapi, QWidget *parent) :
+DialogUpdate::DialogUpdate(OKJSongbookAPI &sbApi, QWidget *parent) :
+    sbApi(sbApi),
     QDialog(parent),
     ui(new Ui::DialogUpdate)
 {
-    sbApi = sbapi;
     ui->setupUi(this);
     headerLabels.append("Artist");
     headerLabels.append("Title");
@@ -37,21 +36,19 @@ DialogUpdate::DialogUpdate(OKJSongbookAPI *sbapi, QWidget *parent) :
     connect(ui->lineEditDirPath, SIGNAL(textChanged(QString)), this, SLOT(saveState()));
     connect(ui->checkBoxConvertUnderscore, SIGNAL(clicked(bool)), this, SLOT(saveState()));
     connect(ui->checkBoxConvertUnderscoreFiles, SIGNAL(clicked(bool)), this, SLOT(saveState()));
-
-
+    connect(ui->btnBrowse, &QPushButton::clicked, this, &DialogUpdate::btnBrowseClicked);
+    connect(ui->btnLoadCsv, &QPushButton::clicked, this, &DialogUpdate::btnLoadCsvClicked);
+    connect(ui->btnSend, &QPushButton::clicked, this, &DialogUpdate::btnSendClicked);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DialogUpdate::close);
+    connect(ui->btnScanFiles, &QPushButton::clicked, this, &DialogUpdate::btnScanFilesClicked);
+    connect(ui->btnBrowseDirs, &QPushButton::clicked, this, &DialogUpdate::btnBrowseDirsClicked);
 }
 
-DialogUpdate::~DialogUpdate()
-{
+DialogUpdate::~DialogUpdate() = default;
 
-
-    delete ui;
-}
-
-void DialogUpdate::on_btnBrowse_clicked()
+void DialogUpdate::btnBrowseClicked()
 {
     QString defaultFilePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    qDebug() << "Default save location: " << defaultFilePath;
     QString saveFilePath = QFileDialog::getOpenFileName(this,tr("Select CSV to import"), defaultFilePath, tr("(*.csv)"));
     if (saveFilePath != "")
     {
@@ -59,7 +56,7 @@ void DialogUpdate::on_btnBrowse_clicked()
     }
 }
 
-void DialogUpdate::on_btnLoadCsv_clicked()
+void DialogUpdate::btnLoadCsvClicked()
 {
     ui->tableWidgetPreview->clear();
     ui->tableWidgetPreview->setRowCount(0);
@@ -71,14 +68,14 @@ void DialogUpdate::on_btnLoadCsv_clicked()
     QFile csvFile(path);
     if (!csvFile.open(QIODevice::ReadOnly))
     {
-        QMessageBox::information(0, "Error opening file", csvFile.errorString());
+        QMessageBox::information(this, "Error opening file", csvFile.errorString());
         return;
     }
     else
     {
         ui->tableWidgetPreview->setHorizontalHeaderLabels(headerLabels);
-        QProgressDialog *progressDialog = new QProgressDialog(this);
-        progressDialog->setCancelButton(0);
+        auto *progressDialog = new QProgressDialog(this);
+        progressDialog->setCancelButton(nullptr);
         progressDialog->setMinimum(0);
         progressDialog->setMaximum(0);
         progressDialog->setValue(0);
@@ -106,7 +103,7 @@ void DialogUpdate::on_btnLoadCsv_clicked()
             songs.insert(song);
             int row = ui->tableWidgetPreview->rowCount();
             ui->tableWidgetPreview->setRowCount(row + 1);
-            QTableWidgetItem *newItem = new QTableWidgetItem(artist);
+            auto *newItem = new QTableWidgetItem(artist);
             ui->tableWidgetPreview->setItem(row, 0, newItem);
             newItem = new QTableWidgetItem(title);
             ui->tableWidgetPreview->setItem(row, 1, newItem);
@@ -122,7 +119,7 @@ void DialogUpdate::on_btnLoadCsv_clicked()
 
 }
 
-QStringList DialogUpdate::parseCsvString(QString string)
+QStringList DialogUpdate::parseCsvString(const QString& string)
 {
     enum State {Normal, Quote} state = Normal;
     QStringList fields;
@@ -184,7 +181,7 @@ QStringList DialogUpdate::parseCsvString(QString string)
     return fields;
 }
 
-QStringList DialogUpdate::findKaroakeFiles(QString directory)
+QStringList DialogUpdate::findKaraokeFiles(const QString& directory)
 {
     QStringList files;
     QDir dir(directory);
@@ -193,13 +190,7 @@ QStringList DialogUpdate::findKaroakeFiles(QString directory)
         iterator.next();
         if (!iterator.fileInfo().isDir()) {
             QString fn = iterator.filePath();
-            if (fn.endsWith(".zip",Qt::CaseInsensitive))
-                files.append(fn);
-            else if (fn.endsWith(".cdg", Qt::CaseInsensitive))
-            {
-                files.append(fn);
-            }
-            else if (fn.endsWith(".mkv", Qt::CaseInsensitive) || fn.endsWith(".avi", Qt::CaseInsensitive) || fn.endsWith(".wmv", Qt::CaseInsensitive) || fn.endsWith(".mp4", Qt::CaseInsensitive) || fn.endsWith(".mpg", Qt::CaseInsensitive) || fn.endsWith(".mpeg", Qt::CaseInsensitive))
+            if (fn.endsWith(".zip",Qt::CaseInsensitive) || fn.endsWith(".cdg", Qt::CaseInsensitive) || fn.endsWith(".mkv", Qt::CaseInsensitive) || fn.endsWith(".avi", Qt::CaseInsensitive) || fn.endsWith(".wmv", Qt::CaseInsensitive) || fn.endsWith(".mp4", Qt::CaseInsensitive) || fn.endsWith(".mpg", Qt::CaseInsensitive) || fn.endsWith(".mpeg", Qt::CaseInsensitive))
                 files.append(fn);
         }
     }
@@ -225,29 +216,24 @@ void DialogUpdate::saveState()
     settings.saveCsvImporterConfig(cConfig);
 }
 
-void DialogUpdate::on_btnSend_clicked()
+void DialogUpdate::btnSendClicked()
 {
-    QProgressDialog *progressDialog = new QProgressDialog(this);
-    progressDialog->setCancelButton(0);
+    auto *progressDialog = new QProgressDialog(this);
+    progressDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+    progressDialog->setCancelButton(nullptr);
     progressDialog->setMinimum(0);
     progressDialog->setMaximum(20);
     progressDialog->setValue(0);
     progressDialog->setLabelText("Updating request server song database");
     progressDialog->show();
     QApplication::processEvents();
-    connect(sbApi, SIGNAL(remoteSongDbUpdateNumDocs(int)), progressDialog, SLOT(setMaximum(int)));
-    connect(sbApi, SIGNAL(remoteSongDbUpdateProgress(int)), progressDialog, SLOT(setValue(int)));
-    sbApi->updateSongDb(songs);
+    connect(&sbApi, SIGNAL(remoteSongDbUpdateNumDocs(int)), progressDialog, SLOT(setMaximum(int)));
+    connect(&sbApi, SIGNAL(remoteSongDbUpdateProgress(int)), progressDialog, SLOT(setValue(int)));
+    sbApi.updateSongDb(songs);
     progressDialog->close();
-    delete progressDialog;
 }
 
-void DialogUpdate::on_buttonBox_rejected()
-{
-    hide();
-}
-
-void DialogUpdate::on_btnScanFiles_clicked()
+void DialogUpdate::btnScanFilesClicked()
 {
     ui->tableWidgetPreview->clear();
     ui->tableWidgetPreview->setRowCount(0);
@@ -255,10 +241,10 @@ void DialogUpdate::on_btnScanFiles_clicked()
     songs.clear();
 
     QString dir = ui->lineEditDirPath->text();
-    QStringList files = findKaroakeFiles(dir);
+    QStringList files = findKaraokeFiles(dir);
 
-    QProgressDialog *progressDialog = new QProgressDialog(this);
-    progressDialog->setCancelButton(0);
+    auto *progressDialog = new QProgressDialog(this);
+    progressDialog->setCancelButton(nullptr);
     progressDialog->setMinimum(0);
     progressDialog->setMaximum(files.size());
     progressDialog->setValue(0);
@@ -285,7 +271,7 @@ void DialogUpdate::on_btnScanFiles_clicked()
         songs.insert(song);
         int row = ui->tableWidgetPreview->rowCount();
         ui->tableWidgetPreview->setRowCount(row + 1);
-        QTableWidgetItem *newItem = new QTableWidgetItem(artist);
+        auto *newItem = new QTableWidgetItem(artist);
         ui->tableWidgetPreview->setItem(row, 0, newItem);
         newItem = new QTableWidgetItem(title);
         ui->tableWidgetPreview->setItem(row, 1, newItem);
@@ -298,7 +284,7 @@ void DialogUpdate::on_btnScanFiles_clicked()
     delete progressDialog;
 }
 
-void DialogUpdate::on_btnBrowseDirs_clicked()
+void DialogUpdate::btnBrowseDirsClicked()
 {
     QString fileName = QFileDialog::getExistingDirectory(this);
     if (fileName != "")

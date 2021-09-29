@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 Thomas Isaac Lightburn
+ * Copyright (c) 2013-2021 Thomas Isaac Lightburn
  *
  *
  * This file is part of OpenKJ.
@@ -27,37 +27,36 @@
 #include <QApplication>
 #include <QPainter>
 #include <QSvgRenderer>
+#include <utility>
 
 
-RequestsTableModel::RequestsTableModel(OKJSongbookAPI *sbApi, QObject *parent) :
+RequestsTableModel::RequestsTableModel(OKJSongbookAPI &sbApi, QObject *parent) :
+        songbookApi(sbApi),
         QAbstractTableModel(parent) {
-    songbookApi = sbApi;;
-    connect(songbookApi, SIGNAL(requestsChanged(OkjsRequests)), this, SLOT(requestsChanged(OkjsRequests)));
-    connect(songbookApi, SIGNAL(alertReceived(QString, QString)), this, SIGNAL(alertReceived(QString, QString)));
+    connect(&songbookApi, &OKJSongbookAPI::requestsChanged, this, &RequestsTableModel::requestsChanged);
+    connect(&songbookApi, &OKJSongbookAPI::alertReceived, this, &RequestsTableModel::alertReceived);
 }
 
-void RequestsTableModel::requestsChanged(OkjsRequests requests) {
+void RequestsTableModel::requestsChanged(const OkjsRequests& requests) {
     emit layoutAboutToBeChanged();
     m_requests.clear();
-    for (int i = 0; i < requests.size(); i++) {
-        int index = requests.at(i).requestId;
-        QString singer = requests.at(i).singer;
-        QString artist = requests.at(i).artist;
-        QString title = requests.at(i).title;
-        int reqtime = requests.at(i).time;
-        int key = requests.at(i).key;
+    for (const auto & request : requests) {
+        int index = request.requestId;
+        QString singer = request.singer;
+        QString artist = request.artist;
+        QString title = request.title;
+        int reqtime = request.time;
+        int key = request.key;
         m_requests << Request(index, singer, artist, title, reqtime, key);
     }
     emit layoutChanged();
 }
 
 int RequestsTableModel::rowCount(const QModelIndex &parent) const {
-    Q_UNUSED(parent);
     return m_requests.size();
 }
 
 int RequestsTableModel::columnCount(const QModelIndex &parent) const {
-    Q_UNUSED(parent);
     return 8;
 }
 
@@ -149,7 +148,6 @@ QVariant RequestsTableModel::headerData(int section, Qt::Orientation orientation
 }
 
 Qt::ItemFlags RequestsTableModel::flags(const QModelIndex &index) const {
-    Q_UNUSED(index);
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
@@ -173,9 +171,9 @@ void Request::setKey(int key) {
 
 Request::Request(int RequestId, QString Singer, QString Artist, QString Title, int ts, int key) {
     m_requestId = RequestId;
-    m_singer = Singer;
-    m_artist = Artist;
-    m_title = Title;
+    m_singer = std::move(Singer);
+    m_artist = std::move(Artist);
+    m_title = std::move(Title);
     m_timeStamp = ts;
     m_key = key;
 }
