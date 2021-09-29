@@ -32,7 +32,7 @@ jobs:
           BRANCH="unstable"
         fi
         VER=${{ steps.get_version.outputs.version-without-v }}
-        FN="OpenKJ-Songbook-Agent-${VER}-osx-installer.pkg"
+        FN="OpenKJ-Songbook-Agent-v${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}.${{ steps.get_version.outputs.patch }}-setup-macOS.pkg"
         echo "installer_fn=${FN}" >> $GITHUB_ENV
         echo "rtype=${RTYPE}" >> $GITHUB_ENV
         echo "branch=${BRANCH}" >> $GITHUB_ENV
