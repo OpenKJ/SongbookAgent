@@ -11,8 +11,6 @@ set(sem_ver "${ver_major}.${ver_minor}.${ver_build}")
 
 message(STATUS "Building OpenKJ Songbook Agent ${sem_ver}")
 
-message("Building OpenKJ Songbook Agent ${sem_ver}")
-
 project(SongbookAgent
         VERSION ${sem_ver}
         LANGUAGES CXX C
@@ -113,21 +111,21 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBS
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  #  set(openkj_ICON ${CMAKE_CURRENT_SOURCE_DIR}/src/Icons/OpenKJ.icns)
-    set_source_files_properties(${openkj_ICON} PROPERTIES
+    set(SongbookAgent_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/SongbookAgent.icns)
+    set_source_files_properties(${SongbookAgent_ICON} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources"
             )
     add_executable(SongbookAgent
             MACOSX_BUNDLE
-           # ${openkj_ICON}
+            ${SongbookAgent_ICON}
             ${SOURCE_FILES}
             )
     set_target_properties(SongbookAgent PROPERTIES
             BUNDLE True
-            MACOSX_BUNDLE_GUI_IDENTIFIER org.openkj.SongbookAgent
+            MACOSX_BUNDLE_GUI_IDENTIFIER com.okjsongbook.agent
             MACOSX_BUNDLE_BUNDLE_NAME SongbookAgent
             MACOSX_BUNDLE_BUNDLE_VERSION ${sem_ver}
-            MACOSX_BUNDLE_ICON_FILE OpenKJ.icns
+            MACOSX_BUNDLE_ICON_FILE SongbookAgent.icns
             )
     target_link_libraries(SongbookAgent
             ${LIBRARIES}
