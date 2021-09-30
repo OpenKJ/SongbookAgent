@@ -82,7 +82,7 @@ jobs:
     - name: Run macdeployqt
       working-directory: ${{github.workspace}}/build
       run: |
-        macdeployqt SongbookAgent.app -codesign="Developer ID Application: Isaac Lightburn (47W8CPBS5A)" -appstore-compiant
+        macdeployqt SongbookAgent.app -codesign="Developer ID Application: Isaac Lightburn (47W8CPBS5A)" -appstore-compliant
 
     - name: Sign app bundle
       working-directory: ${{github.workspace}}/build
